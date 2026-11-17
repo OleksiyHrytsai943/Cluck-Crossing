@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Home: a night street corner. A lamp-post signpost leads to the sections,
-/// the pedestrian WALK signal starts the next crossing.
+/// Home: a sunny farmyard. A wooden signpost by the barn leads to the sections,
+/// the big GO! sign starts the next crossing.
 struct CornerView: View {
     @ObservedObject var store: ProfileStore
     @ObservedObject var router: AppRouter
@@ -63,9 +63,9 @@ struct CornerView: View {
 
     private var signpost: some View {
         ZStack(alignment: .topLeading) {
-            // The lamp post the signs hang on.
+            // The fence post the signs hang on.
             RoundedRectangle(cornerRadius: 4)
-                .fill(LinearGradient(colors: [Color(white: 0.22), Color(white: 0.08)], startPoint: .leading, endPoint: .trailing))
+                .fill(LinearGradient(colors: [Color(red: 0.62, green: 0.42, blue: 0.24), Color(red: 0.38, green: 0.24, blue: 0.13)], startPoint: .leading, endPoint: .trailing))
                 .frame(width: 12)
                 .padding(.leading, 26)
                 .padding(.bottom, -40)
@@ -116,9 +116,9 @@ struct CornerView: View {
                         .resizable()
                         .frame(width: 74, height: 74)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("WALK")
+                        Text("GO!")
                             .font(Theme.display(34))
-                            .foregroundColor(Theme.neonTeal)
+                            .foregroundColor(Theme.meadow)
                         Text(next.title)
                             .font(Theme.headline(17))
                             .foregroundColor(.white)
@@ -127,22 +127,22 @@ struct CornerView: View {
                     Spacer(minLength: 0)
                     Image(systemName: "chevron.right")
                         .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(Theme.neonTeal)
+                        .foregroundColor(Theme.meadow)
                 }
                 .padding(12)
                 .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(Theme.panel.opacity(0.95)))
-                .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(Theme.neonTeal, lineWidth: 2.5).shadow(color: Theme.neonTeal, radius: 8))
+                .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(Theme.meadow, lineWidth: 2.5).shadow(color: Theme.ink.opacity(0.3), radius: 2, x: 0, y: 2))
             }
             .buttonStyle(WalkSignalButtonStyle())
-            .accessibilityLabel("Walk: start \(next.title)")
+            .accessibilityLabel("Go: start \(next.title)")
             .accessibilityIdentifier(AccessibilityID.walkButton)
 
             HStack(spacing: 10) {
-                modeTile(title: "Night Run", detail: profile.bestNightLanes > 0 ? "Best \(profile.bestNightLanes) lanes" : "Endless road",
-                         color: Theme.neonPink, id: AccessibilityID.nightRunButton) {
-                    startRun(.nightRun)
+                modeTile(title: "Long Road", detail: profile.bestLongRoadLanes > 0 ? "Best \(profile.bestLongRoadLanes) lanes" : "Endless field road",
+                         color: Theme.pumpkin, id: AccessibilityID.longRoadButton) {
+                    startRun(.longRoad)
                 }
-                modeTile(title: "Daily", detail: dailyDetail, color: Theme.eggGold, id: AccessibilityID.dailyButton) {
+                modeTile(title: "Daily", detail: dailyDetail, color: Theme.wheat, id: AccessibilityID.dailyButton) {
                     startRun(.daily(store.todayKey))
                 }
             }
@@ -151,7 +151,7 @@ struct CornerView: View {
         .padding(.bottom, 10)
     }
 
-    /// This week's Night Shift rule and the Lamp Lighter progress (opens Top Players).
+    /// This week's Farm Week rule and the Sunflower Row progress (opens Top Players).
     private var shiftStrip: some View {
         let shift = store.shift
         return Button {
@@ -160,9 +160,9 @@ struct CornerView: View {
             HStack(spacing: 8) {
                 ArtIcon(name: shift.theme.art, size: 28, tint: Color.white.opacity(0.1))
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("NIGHT SHIFT · \(shift.theme.title.uppercased())")
-                        .font(Theme.led(11))
-                        .foregroundColor(Theme.sodium)
+                    Text("FARM WEEK · \(shift.theme.title.uppercased())")
+                        .font(Theme.chalkFont(11))
+                        .foregroundColor(Theme.pumpkin)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                     Text(shift.theme.detail)
@@ -173,9 +173,9 @@ struct CornerView: View {
                 }
                 Spacer(minLength: 4)
                 HStack(spacing: 2) {
-                    ForEach(0..<LampLighter.lampsPerWeek, id: \.self) { i in
+                    ForEach(0..<SunflowerRow.sunflowersPerWeek, id: \.self) { i in
                         Circle()
-                            .fill(i < store.lampsLitThisWeek ? Theme.sodium : Color.white.opacity(0.18))
+                            .fill(i < store.sunflowersLitThisWeek ? Theme.pumpkin : Color.white.opacity(0.18))
                             .frame(width: 6, height: 6)
                     }
                 }
@@ -183,10 +183,10 @@ struct CornerView: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
             .background(Capsule().fill(Theme.panel.opacity(0.92)))
-            .overlay(Capsule().stroke(Theme.sodium.opacity(0.6), lineWidth: 1.5))
+            .overlay(Capsule().stroke(Theme.pumpkin.opacity(0.6), lineWidth: 1.5))
         }
         .buttonStyle(WalkSignalButtonStyle())
-        .accessibilityLabel("Night Shift: \(shift.theme.title). \(shift.theme.detail) \(store.lampsLitThisWeek) of 7 lamps lit.")
+        .accessibilityLabel("Farm Week: \(shift.theme.title). \(shift.theme.detail) \(store.sunflowersLitThisWeek) of 7 sunflowers in bloom.")
         .accessibilityIdentifier(AccessibilityID.shiftStrip)
     }
 
@@ -196,9 +196,9 @@ struct CornerView: View {
     }
 
     private func modeTile(title: String, detail: String, color: Color, id: String, action: @escaping () -> Void) -> some View {
-        let unlocked = profile.nightRunUnlocked
+        let unlocked = profile.longRoadUnlocked
         return Button {
-            if unlocked { action() } else { router.show(toast: "Clear all of Sleepy Lane to open \(title).") }
+            if unlocked { action() } else { router.show(toast: "Clear all of Meadow Lane to open \(title).") }
         } label: {
             HStack(spacing: 8) {
                 Image(unlocked ? "signal_walk" : "signal_stop")
@@ -227,7 +227,7 @@ struct CornerView: View {
     }
 }
 
-/// One green street-name sign pointing right, with generated art and the section name.
+/// One wooden finger sign pointing right, with generated art and the section name.
 struct SignPlank: View {
     let route: Route
 

@@ -16,8 +16,8 @@ struct LeaderboardPage: Equatable, Codable {
     var daysLeft: Int
     var entries: [LeaderboardEntry]
     var rewards: [RosterRewardSlot]
-    var lampsLit: Int
-    var lampsPerWeek: Int
+    var sunflowersLit: Int
+    var sunflowersPerWeek: Int
     /// True while the board shows sample rivals instead of a live roster.
     var isPreview: Bool
     var notice: String
@@ -33,15 +33,15 @@ struct PlayerStanding: Equatable {
 /// Extension point for the weekly roster. A future online provider implements this
 /// (fetch top 5 for `shift.weekKey`, submit `player.weeklyBest`); the app only depends on the protocol.
 protocol LeaderboardProviding {
-    func weeklyTop(for shift: NightShift, player: PlayerStanding, lampsLit: Int, now: Date) async throws -> LeaderboardPage
+    func weeklyTop(for shift: FarmWeek, player: PlayerStanding, sunflowersLit: Int, now: Date) async throws -> LeaderboardPage
 }
 
 /// Offline provider: deterministic sample rivals for the week, merged with the player's real weekly best.
 /// The page is flagged `isPreview` and says so on screen.
 struct PreviewLeaderboardProvider: LeaderboardProviding {
-    static let rivalNames = ["MidnightMabel", "CurbHopper", "NeonNugget", "RushHourRoo", "LampPostLou", "ZebraZed", "TaxiTina", "OmeletteOtto"]
+    static let rivalNames = ["MeadowMabel", "HayHopper", "BarnyardBetty", "TractorTina", "SunflowerSue", "GravelGus", "OrchardOtto", "CornfieldCleo"]
 
-    func weeklyTop(for shift: NightShift, player: PlayerStanding, lampsLit: Int, now: Date) async throws -> LeaderboardPage {
+    func weeklyTop(for shift: FarmWeek, player: PlayerStanding, sunflowersLit: Int, now: Date) async throws -> LeaderboardPage {
         var rng = SeededGenerator(seed: DailyCrossing.seed(for: shift.weekKey))
         var entries: [LeaderboardEntry] = Self.rivalNames.shuffled(using: &rng).prefix(6).map { name in
             LeaderboardEntry(rank: 0, name: name, hen: Hen.all.randomElement(using: &rng)?.art ?? "hen_pepper",
@@ -60,8 +60,8 @@ struct PreviewLeaderboardProvider: LeaderboardProviding {
             daysLeft: shift.daysLeft(from: now),
             entries: top,
             rewards: RosterRewardSlot.weekly,
-            lampsLit: lampsLit,
-            lampsPerWeek: LampLighter.lampsPerWeek,
+            sunflowersLit: sunflowersLit,
+            sunflowersPerWeek: SunflowerRow.sunflowersPerWeek,
             isPreview: true,
             notice: "Preview roster: sample rivals. The live weekly roster and its rewards arrive in a later update."
         )

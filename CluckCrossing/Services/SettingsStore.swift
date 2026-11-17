@@ -9,7 +9,7 @@ final class SettingsStore: ObservableObject {
     @Published var soundOn: Bool { didSet { defaults.set(soundOn, forKey: Keys.sound) } }
     @Published var musicOn: Bool { didSet { defaults.set(musicOn, forKey: Keys.music) } }
     @Published var hapticsOn: Bool { didSet { defaults.set(hapticsOn, forKey: Keys.haptics) } }
-    /// Left-handed layout swaps the WHISTLE and ROOST buttons.
+    /// Left-handed layout swaps the BELL and ROOST buttons.
     @Published var leftHanded: Bool { didSet { defaults.set(leftHanded, forKey: Keys.leftHanded) } }
 
     private enum Keys {

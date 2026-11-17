@@ -4,7 +4,7 @@ import UIKit
 /// Renders the road and handles touches. All rules live in `RunSession`.
 final class CrossingScene: SKScene {
     private weak var viewModel: GameViewModel?
-    private var session: RunSession { viewModel?.session ?? RunSession(config: RunConfig(mode: .nightRun)) }
+    private var session: RunSession { viewModel?.session ?? RunSession(config: RunConfig(mode: .longRoad)) }
 
     private let world = SKNode()
     private var cell: CGFloat = 75
@@ -18,7 +18,7 @@ final class CrossingScene: SKScene {
     private let hen = SKSpriteNode()
     private var henFacingLeft = false
     private var lastColumn = RunConfig.columns / 2
-    private var blackout = false
+    private var fog = false
     private let flash = SKSpriteNode(color: .red, size: .zero)
 
     private var touchStart: CGPoint?
@@ -37,7 +37,7 @@ final class CrossingScene: SKScene {
         var rush: SKSpriteNode?
         var honk: SKLabelNode?
         var lid: SKSpriteNode?
-        var flare: SKSpriteNode?
+        var spray: SKSpriteNode?
         var lastMultiplier: Double?
     }
 
@@ -52,7 +52,9 @@ final class CrossingScene: SKScene {
         return SKTexture(image: image)
     }()
 
-    private static let sedanTints: [UIColor] = [
+    private static let ink = UIColor(red: 0.17, green: 0.10, blue: 0.06, alpha: 1)
+
+    private static let pickupTints: [UIColor] = [
         UIColor(red: 0.95, green: 0.35, blue: 0.40, alpha: 1),
         UIColor(red: 0.40, green: 0.60, blue: 1.00, alpha: 1),
         UIColor(red: 0.75, green: 0.75, blue: 0.80, alpha: 1),
@@ -64,8 +66,8 @@ final class CrossingScene: SKScene {
         self.viewModel = viewModel
         super.init(size: size)
         scaleMode = .resizeFill
-        backgroundColor = UIColor(red: 0.08, green: 0.09, blue: 0.12, alpha: 1)
-        if case .crossing(let index) = viewModel.mode { blackout = CrossingSpec.all[index].hazards.blackout }
+        backgroundColor = UIColor(red: 0.42, green: 0.66, blue: 0.27, alpha: 1)
+        if case .crossing(let index) = viewModel.mode { fog = CrossingSpec.all[index].hazards.fog }
     }
 
     @available(*, unavailable)
@@ -229,10 +231,10 @@ final class CrossingScene: SKScene {
             plaque.position = CGPoint(x: lane.direction > 0 ? size.width - cell * 0.5 : cell * 0.5, y: cell * 0.5)
             plaque.alpha = 0.85
             plaque.zPosition = 1
-            let label = SKLabelNode(fontNamed: "AvenirNextCondensed-Heavy")
+            let label = SKLabelNode(fontNamed: "AmericanTypewriter-CondensedBold")
             label.fontSize = cell * 0.26
             label.verticalAlignmentMode = .center
-            label.fontColor = UIColor(red: 1, green: 0.84, blue: 0.29, alpha: 1)
+            label.fontColor = Self.ink
             plaque.addChild(label)
             node.addChild(plaque)
             node.plaque = plaque
@@ -252,10 +254,10 @@ final class CrossingScene: SKScene {
             node.addChild(rush)
             node.rush = rush
 
-            let honk = SKLabelNode(fontNamed: "AvenirNextCondensed-Heavy")
+            let honk = SKLabelNode(fontNamed: "AmericanTypewriter-CondensedBold")
             honk.text = lane.direction > 0 ? "HONK ›››" : "‹‹‹ HONK"
             honk.fontSize = cell * 0.3
-            honk.fontColor = UIColor(red: 1, green: 0.7, blue: 0.28, alpha: 1)
+            honk.fontColor = UIColor(red: 0.95, green: 0.55, blue: 0.16, alpha: 1)
             honk.verticalAlignmentMode = .center
             honk.horizontalAlignmentMode = lane.direction > 0 ? .left : .right
             honk.position = CGPoint(x: lane.direction > 0 ? 8 : size.width - 8, y: cell * 0.5)
@@ -264,21 +266,21 @@ final class CrossingScene: SKScene {
             node.addChild(honk)
             node.honk = honk
 
-            if let manhole = lane.manhole {
-                let lid = SKSpriteNode(imageNamed: "manhole")
+            if let sprinkler = lane.sprinkler {
+                let lid = SKSpriteNode(imageNamed: "sprinkler")
                 lid.size = CGSize(width: cell * 0.7, height: cell * 0.7)
-                lid.position = CGPoint(x: (CGFloat(manhole.column) + 0.5) * cell, y: cell * 0.5)
+                lid.position = CGPoint(x: (CGFloat(sprinkler.column) + 0.5) * cell, y: cell * 0.5)
                 lid.zPosition = 3
                 node.addChild(lid)
                 node.lid = lid
-                let flare = SKSpriteNode(imageNamed: "flare")
-                flare.anchorPoint = CGPoint(x: 0.5, y: 0.1)
-                flare.size = CGSize(width: cell * 0.8, height: cell * 1.2)
-                flare.position = CGPoint(x: lid.position.x, y: cell * 0.35)
-                flare.zPosition = 45
-                flare.isHidden = true
-                node.addChild(flare)
-                node.flare = flare
+                let spray = SKSpriteNode(imageNamed: "spray")
+                spray.anchorPoint = CGPoint(x: 0.5, y: 0.1)
+                spray.size = CGSize(width: cell * 0.8, height: cell * 1.2)
+                spray.position = CGPoint(x: lid.position.x, y: cell * 0.35)
+                spray.zPosition = 45
+                spray.isHidden = true
+                node.addChild(spray)
+                node.spray = spray
             }
         }
         world.addChild(node)
@@ -287,10 +289,10 @@ final class CrossingScene: SKScene {
     }
 
     private func updateRow(_ node: RowNode, row: Int) {
-        // Blackout: rows away from the hen sink into darkness.
-        if blackout {
+        // Fog: rows away from the hen fade into white mist.
+        if fog {
             let near = abs(row - session.row) <= 1
-            node.background.color = .black
+            node.background.color = .white
             node.background.colorBlendFactor = near ? 0 : 0.6
         }
         guard let lane = session.lane(row) else { return }
@@ -300,7 +302,7 @@ final class CrossingScene: SKScene {
             if mult != node.lastMultiplier {
                 node.lastMultiplier = mult
                 label.text = mult.map { Formatters.multiplier($0) } ?? "✓"
-                label.fontColor = mult == nil ? UIColor(white: 0.7, alpha: 1) : UIColor(red: 1, green: 0.84, blue: 0.29, alpha: 1)
+                label.fontColor = mult == nil ? UIColor(white: 0.35, alpha: 1) : Self.ink
                 node.plaque?.alpha = mult == nil ? 0.45 : 0.9
             }
         }
@@ -309,20 +311,20 @@ final class CrossingScene: SKScene {
         if let honk = node.honk {
             honk.isHidden = !(lane.truckHonking && Int(time * 6) % 2 == 0)
         }
-        if let manhole = lane.manhole, let lid = node.lid, let flare = node.flare {
-            switch manhole.phase(at: time) {
+        if let sprinkler = lane.sprinkler, let lid = node.lid, let spray = node.spray {
+            switch sprinkler.phase(at: time) {
             case .idle:
-                lid.texture = SKTexture(imageNamed: "manhole")
-                flare.isHidden = true
-            case .glow:
-                lid.texture = SKTexture(imageNamed: "manhole_glow")
+                lid.texture = SKTexture(imageNamed: "sprinkler")
+                spray.isHidden = true
+            case .gurgle:
+                lid.texture = SKTexture(imageNamed: "sprinkler_gurgle")
                 lid.alpha = 0.7 + 0.3 * CGFloat(sin(time * 14))
-                flare.isHidden = true
-            case .flare:
-                lid.texture = SKTexture(imageNamed: "manhole_glow")
+                spray.isHidden = true
+            case .spray:
+                lid.texture = SKTexture(imageNamed: "sprinkler_gurgle")
                 lid.alpha = 1
-                flare.isHidden = false
-                flare.yScale = 0.9 + 0.15 * CGFloat(sin(time * 30))
+                spray.isHidden = false
+                spray.yScale = 0.9 + 0.15 * CGFloat(sin(time * 30))
             }
         }
     }
@@ -338,15 +340,15 @@ final class CrossingScene: SKScene {
                 node = existing
             } else {
                 node = SKSpriteNode(imageNamed: "car_\(car.kind.rawValue)")
-                let height = car.kind == .bus || car.kind == .cornTruck ? cell * 0.78 : cell * 0.66
+                let height = car.kind == .combine || car.kind == .cornTruck ? cell * 0.78 : cell * 0.66
                 node.size = CGSize(width: car.length * cell, height: height)
                 node.xScale = lane.direction > 0 ? 1 : -1
                 node.zPosition = 20
-                if car.kind == .sedan {
-                    node.color = Self.sedanTints[abs(car.id) % Self.sedanTints.count]
+                if car.kind == .pickup {
+                    node.color = Self.pickupTints[abs(car.id) % Self.pickupTints.count]
                     node.colorBlendFactor = 0.55
                 }
-                if blackout {
+                if fog {
                     let beam = SKSpriteNode(texture: Self.softDot)
                     beam.size = CGSize(width: cell * 1.3, height: cell * 0.9)
                     beam.position = CGPoint(x: car.length * cell * 0.5, y: 0)
@@ -361,10 +363,10 @@ final class CrossingScene: SKScene {
                 carNodes[key] = node
             }
             node.position = CGPoint(x: (CGFloat(car.x) + CGFloat(car.length) / 2) * cell, y: rowY)
-            if blackout {
+            if fog {
                 let far = abs(lane.row - session.row) > 1
-                node.color = .black
-                node.colorBlendFactor = far ? 0.85 : (car.kind == .sedan ? 0.3 : 0)
+                node.color = .white
+                node.colorBlendFactor = far ? 0.8 : (car.kind == .pickup ? 0.3 : 0)
             }
         }
         for key in carNodes.keys where key.row == lane.row && !seen.contains(key) {
@@ -425,7 +427,7 @@ final class CrossingScene: SKScene {
                 }
             case .kernel(let row, let column):
                 burst(at: center(row: row, column: column), color: UIColor(red: 1, green: 0.84, blue: 0.29, alpha: 1), count: 8)
-            case .whistle:
+            case .bell:
                 let ring = SKShapeNode(circleOfRadius: cell * 0.5)
                 ring.strokeColor = UIColor(red: 0.18, green: 0.9, blue: 0.84, alpha: 1)
                 ring.lineWidth = 6
@@ -437,8 +439,8 @@ final class CrossingScene: SKScene {
             case .honk:
                 break
             case .hit(let cause, _):
-                burst(at: hen.position, color: cause == .flare ? .orange : .white, count: 14, feathers: true)
-                flash.color = cause == .flare ? .orange : .red
+                burst(at: hen.position, color: cause == .spray ? .orange : .white, count: 14, feathers: true)
+                flash.color = cause == .spray ? .orange : .red
                 flash.run(.sequence([.fadeAlpha(to: 0.35, duration: 0.05), .fadeOut(withDuration: 0.35)]))
                 world.run(.sequence([.moveBy(x: 10, y: 0, duration: 0.04), .moveBy(x: -20, y: 0, duration: 0.06), .moveBy(x: 10, y: 0, duration: 0.04)]))
             case .finished:
@@ -453,7 +455,7 @@ final class CrossingScene: SKScene {
     }
 
     private func floatText(_ text: String, at point: CGPoint, color: UIColor, size: CGFloat) {
-        let label = SKLabelNode(fontNamed: "AvenirNextCondensed-Heavy")
+        let label = SKLabelNode(fontNamed: "AmericanTypewriter-CondensedBold")
         label.text = text
         label.fontSize = size
         label.fontColor = color

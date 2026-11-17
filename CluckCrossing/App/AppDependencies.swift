@@ -1,7 +1,7 @@
 import Foundation
 
 /// Everything the app needs at launch. Launch arguments keep UI tests and screenshot tours deterministic:
-/// `--uitesting`, `--autopilot`, `--coins=N`, `--cleared=N`, `--lamps=N`, `--open=<route>`, `--show-tutorial`, `--seed=N`.
+/// `--uitesting`, `--autopilot`, `--coins=N`, `--cleared=N`, `--sunflowers=N`, `--open=<route>`, `--show-tutorial`, `--seed=N`.
 @MainActor
 final class AppDependencies {
     let store: ProfileStore
@@ -43,7 +43,7 @@ final class AppDependencies {
                 coins: Self.value(of: "--coins=", in: arguments).flatMap(Int.init) ?? 5_000,
                 clearedCrossings: Self.value(of: "--cleared=", in: arguments).flatMap(Int.init) ?? 0
             )
-            if let lamps = Self.value(of: "--lamps=", in: arguments).flatMap(Int.init) { store.seedLamps(lamps) }
+            if let sunflowers = Self.value(of: "--sunflowers=", in: arguments).flatMap(Int.init) { store.seedSunflowers(sunflowers) }
         }
     }
 

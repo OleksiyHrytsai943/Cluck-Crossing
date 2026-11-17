@@ -55,8 +55,8 @@ final class GameViewModel: ObservableObject {
     var hazards: HazardSet {
         switch mode {
         case .crossing(let index): CrossingSpec.all[index].hazards
-        case .daily: HazardSet(cornTrucks: true, manholes: true, hotAsphalt: true, blackout: false)
-        case .nightRun: .all
+        case .daily: HazardSet(cornTrucks: true, sprinklers: true, hotGravel: true, fog: false)
+        case .longRoad: .all
         }
     }
 
@@ -132,13 +132,13 @@ final class GameViewModel: ObservableObject {
         guard phase == .running else { return }
         if session.hop(action) {
             switch action {
-            case .roost, .whistle: break
+            case .roost, .bell: break
             default: haptics.play(.hop)
             }
         } else if action == .roost {
-            show(session.kind.isSafe ? "Basket is empty: cross a lane first" : "Roost only on an island", color: Theme.mutedText)
-        } else if action == .whistle {
-            show("Whistle needs a full crop of grain", color: Theme.mutedText)
+            show(session.kind.isSafe ? "Basket is empty: cross a lane first" : "Roost only on a hay strip", color: Theme.mutedText)
+        } else if action == .bell {
+            show("The bell needs a full sack of grain", color: Theme.mutedText)
         }
         snapshot = session.snapshot
     }
@@ -150,8 +150,8 @@ final class GameViewModel: ObservableObject {
             switch event {
             case .hop(_, _, let forced):
                 if forced {
-                    sound.play(.flare, volume: 0.6)
-                    show("Hot feet! Forced hop", color: Theme.sodium)
+                    sound.play(.spray, volume: 0.6)
+                    show("Hot feet! Forced hop", color: Theme.pumpkin)
                 } else {
                     sound.play(.hop, volume: 0.5)
                 }
@@ -160,22 +160,22 @@ final class GameViewModel: ObservableObject {
             case .roosted(let amount):
                 sound.play(.roost)
                 haptics.play(.roost)
-                show("+\(Formatters.number(amount)) banked", color: Theme.eggGold)
+                show("+\(Formatters.number(amount)) banked", color: Theme.wheat)
             case .kernel:
                 sound.play(.kernel, volume: 0.7)
                 haptics.play(.kernel)
-            case .whistle(let rows):
-                sound.play(.whistle)
-                haptics.play(.whistle)
-                show("Whistle! \(rows.count) lanes frozen", color: Theme.neonTeal)
+            case .bell(let rows):
+                sound.play(.bell)
+                haptics.play(.bell)
+                show("Ding! \(rows.count) lanes held", color: Theme.meadow)
             case .honk:
                 sound.play(.honk, volume: 0.7)
                 haptics.play(.honk)
             case .hit(let cause, let lost):
-                sound.play(cause == .flare ? .flare : .bump)
+                sound.play(cause == .spray ? .spray : .bump)
                 haptics.play(.bump)
-                let what = cause == .flare ? "Scorched!" : "Bumped!"
-                show(lost > 0 ? "\(what) Lost \(Formatters.number(lost)) eggs" : what, color: Theme.neonRed)
+                let what = cause == .spray ? "Soaked!" : "Bumped!"
+                show(lost > 0 ? "\(what) Lost \(Formatters.number(lost)) eggs" : what, color: Theme.tomato)
             case .finished:
                 sound.play(.finish)
                 haptics.play(.finish)

@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Hens live in the windows of a night apartment block. Lit windows are adopted hens;
-/// tapping a window draws its curtain and shows that hen on the porch panel below.
+/// Hens live in the nest boxes of the coop. Straw-lit boxes are adopted hens;
+/// tapping a box swings its little barn doors open and shows that hen on the porch board below.
 struct HenhouseView: View {
     @StateObject private var viewModel: HenhouseViewModel
     @ObservedObject private var store: ProfileStore
@@ -18,7 +18,7 @@ struct HenhouseView: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            StreetHeader(title: "HENHOUSE", color: Theme.eggGold, coins: store.coins, onBack: router.back)
+            FarmHeader(title: "HENHOUSE", color: Theme.wheat, coins: store.coins, onBack: router.back)
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 16) {
                     ForEach(Hen.all) { hen in
@@ -49,37 +49,37 @@ struct HenhouseView: View {
                 // Window light: warm if adopted, cold blue if empty.
                 RoundedRectangle(cornerRadius: 6)
                     .fill(owned
-                          ? LinearGradient(colors: [Color(red: 1, green: 0.85, blue: 0.5), Theme.sodium], startPoint: .top, endPoint: .bottom)
-                          : LinearGradient(colors: [Color(red: 0.12, green: 0.16, blue: 0.3), Color(red: 0.05, green: 0.07, blue: 0.15)], startPoint: .top, endPoint: .bottom))
+                          ? LinearGradient(colors: [Color(red: 1, green: 0.85, blue: 0.5), Theme.pumpkin], startPoint: .top, endPoint: .bottom)
+                          : LinearGradient(colors: [Color(red: 0.36, green: 0.23, blue: 0.13), Color(red: 0.22, green: 0.14, blue: 0.08)], startPoint: .top, endPoint: .bottom))
                 Image(hen.art)
                     .resizable()
                     .scaledToFit()
                     .padding(8)
                     .opacity(owned ? 1 : 0.35)
-                    .colorMultiply(owned ? .white : Color(red: 0.4, green: 0.45, blue: 0.7))
+                    .colorMultiply(owned ? .white : Color(red: 0.6, green: 0.5, blue: 0.4))
                 // Curtains part for the focused window.
                 HStack(spacing: 0) {
-                    Rectangle().fill(Theme.neonRed.opacity(0.85))
+                    Rectangle().fill(Theme.tomato.opacity(0.85))
                         .frame(width: focused ? 10 : 40)
                     Spacer(minLength: 0)
-                    Rectangle().fill(Theme.neonRed.opacity(0.85))
+                    Rectangle().fill(Theme.tomato.opacity(0.85))
                         .frame(width: focused ? 10 : 40)
                 }
                 // Window cross bar & sill.
                 Rectangle().fill(Theme.ink).frame(height: 5).offset(y: -60)
-                Rectangle().fill(Color(white: 0.75)).frame(height: 8).offset(y: 4)
+                Rectangle().fill(Color(red: 0.55, green: 0.38, blue: 0.2)).frame(height: 8).offset(y: 4)
                 if selected {
-                    Text("OUT TONIGHT")
-                        .font(Theme.led(10))
+                    Text("OUT TODAY")
+                        .font(Theme.chalkFont(10))
                         .foregroundColor(Theme.ink)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
-                        .background(Capsule().fill(Theme.neonTeal))
+                        .background(Capsule().fill(Theme.meadow))
                         .offset(y: -6)
                 }
             }
             .frame(height: 140)
-            .overlay(RoundedRectangle(cornerRadius: 6).stroke(focused ? Theme.neonTeal : Theme.ink, lineWidth: focused ? 4 : 5))
+            .overlay(RoundedRectangle(cornerRadius: 6).stroke(focused ? Theme.meadow : Theme.ink, lineWidth: focused ? 4 : 5))
         }
         .buttonStyle(.plain)
         .accessibilityLabel(owned ? "\(hen.name)\(selected ? ", chosen" : "")" : "\(hen.name), \(hen.price) coins")
@@ -116,7 +116,7 @@ struct HenhouseView: View {
                         Text(selected ? "Chosen" : owned ? "Take her out" : "Adopt \(Formatters.number(hen.price))")
                     }
                 }
-                .buttonStyle(NeonPillButtonStyle(color: owned ? Theme.neonTeal : Theme.eggGold, filled: !selected))
+                .buttonStyle(FarmButtonStyle(color: owned ? Theme.meadow : Theme.wheat, filled: !selected))
                 .disabled(selected)
                 .padding(.top, 4)
                 .accessibilityIdentifier(AccessibilityID.henAction)
@@ -124,7 +124,7 @@ struct HenhouseView: View {
         }
         .padding(14)
         .background(RoundedRectangle(cornerRadius: 22, style: .continuous).fill(Theme.panel.opacity(0.97)))
-        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(Theme.eggGold.opacity(0.8), lineWidth: 2))
+        .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(Theme.wheat.opacity(0.8), lineWidth: 2))
         .padding(.horizontal, 14)
         .padding(.bottom, 10)
     }

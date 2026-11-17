@@ -6,7 +6,7 @@ enum ProfileError: LocalizedError, Equatable {
     case maxedOut
     case alreadyOwned
     case notOwned
-    case lampsNotLit(needed: Int)
+    case sunflowersNotLit(needed: Int)
     case alreadyClaimed
 
     var errorDescription: String? {
@@ -15,7 +15,7 @@ enum ProfileError: LocalizedError, Equatable {
         case .maxedOut: "This item is already at its top level."
         case .alreadyOwned: "This hen already lives with you."
         case .notOwned: "Adopt this hen first."
-        case .lampsNotLit(let needed): "Light \(needed) more lamps this week to claim."
+        case .sunflowersNotLit(let needed): "Light \(needed) more sunflowers this week to claim."
         case .alreadyClaimed: "Already claimed this week."
         }
     }
@@ -47,9 +47,9 @@ final class ProfileStore: ObservableObject {
     var coins: Int { profile.coins }
     var hen: Hen { Hen.with(id: profile.selectedHen) }
     var todayKey: String { DailyCrossing.key(for: now()) }
-    var shift: NightShift { NightShift.current(at: now()) }
+    var shift: FarmWeek { FarmWeek.current(at: now()) }
     var currentDate: Date { now() }
-    var lampsLitThisWeek: Int { profile.lampsLit(week: shift.weekKey) }
+    var sunflowersLitThisWeek: Int { profile.sunflowersLit(week: shift.weekKey) }
     var weeklyBest: Int { profile.weeklyBest[shift.weekKey] ?? 0 }
 
     private func commit(_ change: (inout PlayerProfile) -> Void) {
@@ -91,27 +91,27 @@ final class ProfileStore: ObservableObject {
 
     // MARK: Runs
 
-    /// Run tunables: upgrades, hen perk and this week's Night Shift rule.
+    /// Run tunables: upgrades, hen perk and this week's Farm Week rule.
     func runConfig(for mode: RunMode, seed: UInt64? = nil) -> RunConfig {
         var config = RunConfig.make(mode: mode, upgrades: profile.upgradeLevels, hen: hen, seed: seed)
         shift.theme.apply(to: &config)
         return config
     }
 
-    // MARK: Lamp Lighter
+    // MARK: Sunflower Row
 
-    func isLampTierClaimed(_ tier: LampLighter.Tier) -> Bool {
-        profile.claimedLamps.contains(LampLighter.claimKey(week: shift.weekKey, lamps: tier.lamps))
+    func isSunflowerTierClaimed(_ tier: SunflowerRow.Tier) -> Bool {
+        profile.claimedSunflowers.contains(SunflowerRow.claimKey(week: shift.weekKey, sunflowers: tier.sunflowers))
     }
 
-    func claimLamps(_ tier: LampLighter.Tier) throws {
+    func claimSunflowers(_ tier: SunflowerRow.Tier) throws {
         let week = shift.weekKey
-        guard !isLampTierClaimed(tier) else { throw ProfileError.alreadyClaimed }
-        let lit = profile.lampsLit(week: week)
-        guard lit >= tier.lamps else { throw ProfileError.lampsNotLit(needed: tier.lamps - lit) }
+        guard !isSunflowerTierClaimed(tier) else { throw ProfileError.alreadyClaimed }
+        let lit = profile.sunflowersLit(week: week)
+        guard lit >= tier.sunflowers else { throw ProfileError.sunflowersNotLit(needed: tier.sunflowers - lit) }
         commit {
             $0.coins += tier.coins
-            $0.claimedLamps.append(LampLighter.claimKey(week: week, lamps: tier.lamps))
+            $0.claimedSunflowers.append(SunflowerRow.claimKey(week: week, sunflowers: tier.sunflowers))
         }
     }
 
@@ -125,7 +125,7 @@ final class ProfileStore: ObservableObject {
             p.stats.lanes += result.lanesCrossed
             p.stats.eggsBanked += result.eggsBanked
             p.stats.kernels += result.kernels
-            p.stats.whistles += result.whistles
+            p.stats.bells += result.bells
             p.stats.bumps += result.hits
             p.stats.roosts += result.roosts
             p.stats.forcedHops += result.forcedHops
@@ -144,24 +144,24 @@ final class ProfileStore: ObservableObject {
                         reward.unlockedCrossing = index + 1
                     }
                 }
-            case .nightRun:
-                reward.isNewBest = result.banked > p.bestNightScore
-                p.bestNightScore = max(p.bestNightScore, result.banked)
-                p.bestNightLanes = max(p.bestNightLanes, result.lanesCrossed)
+            case .longRoad:
+                reward.isNewBest = result.banked > p.bestLongRoadScore
+                p.bestLongRoadScore = max(p.bestLongRoadScore, result.banked)
+                p.bestLongRoadLanes = max(p.bestLongRoadLanes, result.lanesCrossed)
             case .daily(let key):
                 reward.isNewBest = result.banked > (p.dailyBest[key] ?? 0)
                 p.dailyBest[key] = max(p.dailyBest[key] ?? 0, result.banked)
             }
 
-            // Night Shift weekly best and tonight's lamp.
-            let week = NightShift.current(at: now()).weekKey
+            // Farm Week weekly best and tonight's sunflower.
+            let week = FarmWeek.current(at: now()).weekKey
             p.weeklyBest[week] = max(p.weeklyBest[week] ?? 0, result.banked)
             let night = DailyCrossing.key(for: now())
-            if !(p.lampNights[week] ?? []).contains(night) {
-                p.lampNights[week, default: []].append(night)
+            if !(p.sunflowerNights[week] ?? []).contains(night) {
+                p.sunflowerNights[week, default: []].append(night)
             }
             // Keep only the last few weeks.
-            for key in p.lampNights.keys.sorted().dropLast(4) { p.lampNights[key] = nil }
+            for key in p.sunflowerNights.keys.sorted().dropLast(4) { p.sunflowerNights[key] = nil }
 
             p.history.insert(RunRecord(date: now(), mode: result.mode, banked: result.banked, lanes: result.lanesCrossed,
                                        crossed: result.crossed, stars: result.stars), at: 0)
@@ -181,11 +181,11 @@ final class ProfileStore: ObservableObject {
         }
         check(.tenInARow, result.bestStreak >= 10)
         check(.heavyBasket, result.bestRoost >= 300)
-        check(.crossingGuard, profile.stats.whistles >= 25)
+        check(.bellRinger, profile.stats.bells >= 25)
         check(.cornCollector, profile.stats.kernels >= 100)
-        check(.starryNight, profile.totalStars >= 45)
-        check(.nightOwl, result.mode == .nightRun && result.lanesCrossed >= 60)
-        if case .daily = result.mode { check(.dailyCommuter, result.crossed) }
+        check(.starHarvest, profile.totalStars >= 45)
+        check(.longHauler, result.mode == .longRoad && result.lanesCrossed >= 60)
+        if case .daily = result.mode { check(.dailyChores, result.crossed) }
         if case .crossing(let index) = result.mode {
             check(.notAScratch, result.crossed && result.hits == 0 && index >= CrossingSpec.perDistrict)
         }
@@ -235,10 +235,10 @@ final class ProfileStore: ObservableObject {
     }
 
     /// Tour/test helper: pretend the player already played `nights` nights this week.
-    func seedLamps(_ nights: Int) {
+    func seedSunflowers(_ nights: Int) {
         let week = shift.weekKey
         commit { p in
-            p.lampNights[week] = (0..<min(nights, LampLighter.lampsPerWeek)).map { "seed-\($0)" }
+            p.sunflowerNights[week] = (0..<min(nights, SunflowerRow.sunflowersPerWeek)).map { "seed-\($0)" }
         }
     }
 }

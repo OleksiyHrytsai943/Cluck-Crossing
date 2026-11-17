@@ -5,14 +5,14 @@ import Testing
 /// An empty lane that never spawns traffic unless the test adds cars.
 @MainActor
 func quietLane(row: Int, direction: Int = 1, speed: Double = 1, hot: Bool = false) -> LaneState {
-    var lane = LaneState(row: row, direction: direction, baseSpeed: speed, minGap: 2, maxGap: 3, busChance: 0, isHot: hot,
+    var lane = LaneState(row: row, direction: direction, baseSpeed: speed, minGap: 2, maxGap: 3, combineChance: 0, isHot: hot,
                          rng: SeededGenerator(seed: UInt64(row)))
     lane.spawnCountdown = 1_000_000
     return lane
 }
 
 @MainActor
-func makeSession(_ rows: [RowKind], config: RunConfig = RunConfig(mode: .nightRun), configure: (inout [Int: LaneState]) -> Void = { _ in }) -> RunSession {
+func makeSession(_ rows: [RowKind], config: RunConfig = RunConfig(mode: .longRoad), configure: (inout [Int: LaneState]) -> Void = { _ in }) -> RunSession {
     var lanes: [Int: LaneState] = [:]
     for (i, kind) in rows.enumerated() where kind == .lane { lanes[i] = quietLane(row: i) }
     configure(&lanes)
@@ -84,7 +84,7 @@ struct ClutchClimbTests {
     }
 
     @Test func basketUpgradeRaisesEveryLane() {
-        var config = RunConfig(mode: .nightRun)
+        var config = RunConfig(mode: .longRoad)
         config.basketBonus = 0.5
         let s = makeSession([.curb, .lane, .island], config: config)
         hop(s, .forward)
@@ -96,7 +96,7 @@ struct ClutchClimbTests {
 struct BumpTests {
     @Test func carBumpCostsFeatherAndClutchAndSendsHenBack() {
         let s = makeSession([.curb, .lane, .lane, .island]) { lanes in
-            lanes[2]?.cars = [Car(id: 1, kind: .sedan, x: 2.0)]
+            lanes[2]?.cars = [Car(id: 1, kind: .pickup, x: 2.0)]
         }
         hop(s, .forward)
         #expect(s.clutch == 10)
@@ -105,12 +105,12 @@ struct BumpTests {
         #expect(s.clutch == 0)
         #expect(s.row == 0)
         #expect(s.hits == 1)
-        #expect(s.drainEvents().contains(.hit(cause: .car(.sedan), lostClutch: 22)))
+        #expect(s.drainEvents().contains(.hit(cause: .car(.pickup), lostClutch: 22)))
     }
 
     @Test func bumpRespawnsOnLastIslandAndLanesScoreAgain() {
         let s = makeSession([.curb, .lane, .island, .lane, .lane, .finish]) { lanes in
-            lanes[4]?.cars = [Car(id: 1, kind: .van, x: 2.0)]
+            lanes[4]?.cars = [Car(id: 1, kind: .milkVan, x: 2.0)]
         }
         hop(s, .forward); hop(s, .forward); s.roost()
         hop(s, .forward); hop(s, .forward)
@@ -123,7 +123,7 @@ struct BumpTests {
 
     @Test func invulnerabilityWearsOff() {
         let s = makeSession([.curb, .lane, .finish]) { lanes in
-            lanes[1]?.cars = [Car(id: 1, kind: .bus, x: 1.0)]
+            lanes[1]?.cars = [Car(id: 1, kind: .combine, x: 1.0)]
         }
         hop(s, .forward)
         #expect(s.feathers == 2)
@@ -133,10 +133,10 @@ struct BumpTests {
     }
 
     @Test func runEndsWhenFeathersRunOut() {
-        var config = RunConfig(mode: .nightRun)
+        var config = RunConfig(mode: .longRoad)
         config.feathers = 1
         let s = makeSession([.curb, .lane, .finish], config: config) { lanes in
-            lanes[1]?.cars = [Car(id: 1, kind: .sedan, x: 2.0)]
+            lanes[1]?.cars = [Car(id: 1, kind: .pickup, x: 2.0)]
         }
         hop(s, .forward)
         #expect(s.outcome == .outOfFeathers)
@@ -145,7 +145,7 @@ struct BumpTests {
 
     @Test func carsMoveAndHitStandingHen() {
         let s = makeSession([.curb, .lane, .finish]) { lanes in
-            lanes[1]?.cars = [Car(id: 1, kind: .sedan, x: -0.5)]
+            lanes[1]?.cars = [Car(id: 1, kind: .pickup, x: -0.5)]
         }
         hop(s, .forward)
         #expect(s.feathers == 3)
@@ -155,30 +155,30 @@ struct BumpTests {
 }
 
 @MainActor
-struct ManholeTests {
+struct SprinklerTests {
     @Test func phasesCycle() {
-        let m = Manhole(column: 1, idleTime: 2, offset: 0)
+        let m = Sprinkler(column: 1, idleTime: 2, offset: 0)
         #expect(m.phase(at: 1) == .idle)
-        #expect(m.phase(at: 2.5) == .glow)
-        #expect(m.phase(at: 3.2) == .flare)
+        #expect(m.phase(at: 2.5) == .gurgle)
+        #expect(m.phase(at: 3.2) == .spray)
         #expect(m.phase(at: m.period + 0.5) == .idle)
     }
 
-    @Test func flareBumpsButGlowDoesNot() {
+    @Test func sprayBumpsButGurgleDoesNot() {
         let s = makeSession([.curb, .lane, .finish]) { lanes in
-            lanes[1]?.manhole = Manhole(column: 2, idleTime: 0.1, offset: 0)
+            lanes[1]?.sprinkler = Sprinkler(column: 2, idleTime: 0.1, offset: 0)
         }
         // At t≈0.12 the lid glows: standing on it is still allowed.
         hop(s, .forward)
         #expect(s.feathers == 3)
-        // Glow ends at 1.0 → flare.
+        // Glow ends at 1.0 → spray.
         s.update(0.95)
         #expect(s.feathers == 2)
     }
 
     @Test func otherColumnsAreSafe() {
         let s = makeSession([.curb, .lane, .finish]) { lanes in
-            lanes[1]?.manhole = Manhole(column: 0, idleTime: 0.1, offset: 0)
+            lanes[1]?.sprinkler = Sprinkler(column: 0, idleTime: 0.1, offset: 0)
         }
         hop(s, .forward)
         s.update(1.5)
@@ -187,28 +187,28 @@ struct ManholeTests {
 }
 
 @MainActor
-struct WhistleTests {
+struct BellTests {
     @Test func grainFillsFromLanesAndKernels() {
         let s = makeSession([.curb, .lane, .lane, .finish])
         hop(s, .forward)
         #expect(abs(s.grain - RunConfig.grainPerLane) < 0.0001)
     }
 
-    @Test func whistleNeedsFullGrain() {
+    @Test func bellNeedsFullGrain() {
         let s = makeSession([.curb, .lane, .finish])
-        #expect(s.whistle() == false)
+        #expect(s.bell() == false)
     }
 
-    @Test func whistleFreezesThreeLanesThenTheyRush() {
-        var config = RunConfig(mode: .nightRun)
+    @Test func bellFreezesThreeLanesThenTheyRush() {
+        var config = RunConfig(mode: .longRoad)
         config.startGrain = 1
         let s = makeSession([.curb, .lane, .lane, .lane, .lane, .finish], config: config) { lanes in
-            for r in 1...4 { lanes[r]?.cars = [Car(id: r, kind: .sedan, x: -1)] }
+            for r in 1...4 { lanes[r]?.cars = [Car(id: r, kind: .pickup, x: -1)] }
         }
         s.update(0.01)
-        #expect(s.whistle())
+        #expect(s.bell())
         #expect(s.grain == 0)
-        #expect(s.whistles == 1)
+        #expect(s.bells == 1)
         let x1 = s.lane(1)!.cars[0].x
         let x4 = s.lane(4)!.cars[0].x
         s.update(1)
@@ -222,9 +222,9 @@ struct WhistleTests {
         #expect(s.lane(1)!.speed(at: s.time) == s.lane(1)!.baseSpeed)
     }
 
-    @Test func longWhistleUpgradeExtendsFreeze() {
-        let config = RunConfig.make(mode: .nightRun, upgrades: [.longWhistle: 2], hen: Hen.with(id: "pepper"), seed: 1)
-        #expect(config.whistleDuration == 3)
+    @Test func bigBellUpgradeExtendsFreeze() {
+        let config = RunConfig.make(mode: .longRoad, upgrades: [.bigBell: 2], hen: Hen.with(id: "pepper"), seed: 1)
+        #expect(config.bellDuration == 3)
     }
 }
 
@@ -244,7 +244,7 @@ struct CornTruckTests {
     }
 
     @Test func kernelPaysGrainCoinsAndCoolsFeet() {
-        var config = RunConfig(mode: .nightRun)
+        var config = RunConfig(mode: .longRoad)
         config.kernelCoins = 3
         let s = makeSession([.curb, .lane, .finish], config: config) { lanes in
             lanes[1]?.kernels = [Kernel(id: 9, column: 2, expires: 100)]
@@ -266,9 +266,9 @@ struct CornTruckTests {
 }
 
 @MainActor
-struct HotAsphaltTests {
+struct HotGravelTests {
     @Test func heatBuildsOnHotLaneAndForcesHop() {
-        var config = RunConfig(mode: .nightRun)
+        var config = RunConfig(mode: .longRoad)
         config.heatRate = 0.5
         let s = makeSession([.curb, .lane, .lane, .finish], config: config) { lanes in
             lanes[1] = quietLane(row: 1, hot: true)
@@ -283,7 +283,7 @@ struct HotAsphaltTests {
     }
 
     @Test func islandsCoolTheFeet() {
-        var config = RunConfig(mode: .nightRun)
+        var config = RunConfig(mode: .longRoad)
         config.heatRate = 0.5
         let s = makeSession([.curb, .lane, .island, .finish], config: config) { lanes in
             lanes[1] = quietLane(row: 1, hot: true)
@@ -304,8 +304,8 @@ struct HotAsphaltTests {
     }
 
     @Test func coolFeetAndSunnyReduceHeatRate() {
-        let base = RunConfig.make(mode: .nightRun, upgrades: [:], hen: Hen.with(id: "pepper"), seed: 1)
-        let geared = RunConfig.make(mode: .nightRun, upgrades: [.coolFeet: 2], hen: Hen.with(id: "sunny"), seed: 1)
+        let base = RunConfig.make(mode: .longRoad, upgrades: [:], hen: Hen.with(id: "pepper"), seed: 1)
+        let geared = RunConfig.make(mode: .longRoad, upgrades: [.coolFeet: 2], hen: Hen.with(id: "sunny"), seed: 1)
         #expect(geared.heatRate < base.heatRate * 0.65)
     }
 }
@@ -328,8 +328,8 @@ struct RoadTests {
         #expect(s.row == 2)
     }
 
-    @Test func nightRunKeepsExtending() {
-        let s = RunSession(config: RunConfig.make(mode: .nightRun, upgrades: [:], hen: Hen.with(id: "pepper"), seed: 7))
+    @Test func longRoadKeepsExtending() {
+        let s = RunSession(config: RunConfig.make(mode: .longRoad, upgrades: [:], hen: Hen.with(id: "pepper"), seed: 7))
         let start = s.rows.count
         var steps = 0
         while s.row < 30, steps < 20_000, s.isRunning {

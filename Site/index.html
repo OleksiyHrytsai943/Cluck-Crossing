@@ -3,139 +3,122 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cluck Crossing — a night-city crossing game for iPhone</title>
-<meta name="description" content="Hop a brave hen across a neon city at night. Read the traffic, dodge flaring manholes, blow the crossing-guard whistle and roost your eggs before the next car comes. For iPhone.">
+<title>Cluck Crossing — a farm-road crossing game for iPhone</title>
+<meta name="description" content="Hop a brave hen across busy farm roads. Dodge tractors and combines, skip the sprinklers, ring the farm bell and roost your eggs on the hay strips. For iPhone.">
 <link rel="canonical" href="https://{{DOMAIN}}/">
 <link rel="icon" type="image/png" href="assets/icon-512.png">
 <link rel="apple-touch-icon" href="assets/icon-512.png">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Cluck Crossing">
-<meta property="og:description" content="A night-city crossing game for iPhone: hop the lanes, roost your eggs, beat the Night Shift.">
+<meta property="og:description" content="A farm-road crossing game for iPhone: hop the lanes, roost your eggs, win the county-fair ribbons.">
 <meta property="og:url" content="https://{{DOMAIN}}/">
 <meta property="og:image" content="https://{{DOMAIN}}/assets/icon-512.png">
 <meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito:wght@400;600;800&family=Patrick+Hand&display=swap" rel="stylesheet">
 <style>
   :root {
-    --night: #080d1c; --night2: #101b36; --panel: #120e24; --asphalt: #23262e;
-    --pink: #ff5fd2; --teal: #2ee6d6; --gold: #ffd54a; --sodium: #ffb347; --red: #ff3b5c;
-    --cream: #fff4dc; --muted: #c4c8da; --ink: #0b0e17; --sign: #1d6b4a;
+    --sky: #4fa8e8; --sky2: #c4e8fb; --grass: #7cc04b; --grassDark: #4e9a33; --dirt: #b98a5b;
+    --barn: #c8372d; --barnDark: #922620; --wood: #a8743f; --walnut: #4a2e1b; --wheat: #f2c14e;
+    --cream: #fff6e0; --ink: #2b1a10; --chalk: #f3eedc; --board: #2e4a38; --muted: #6b5544;
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
-  body { margin: 0; color: #fff; background: var(--night); font: 400 17px/1.6 "Barlow", -apple-system, sans-serif; }
-  a { color: var(--teal); }
+  body { margin: 0; color: var(--ink); background: var(--cream); font: 400 17px/1.6 "Nunito", -apple-system, sans-serif; }
+  a { color: var(--barn); }
   img { max-width: 100%; display: block; }
   .wrap { max-width: 1120px; margin: 0 auto; padding: 0 22px; }
-  .display { font-family: "Barlow Condensed", "Avenir Next Condensed", sans-serif; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; line-height: 1.05; }
-  .neon-pink { color: #fff; text-shadow: 0 0 2px var(--pink), 0 0 10px var(--pink), 0 0 24px rgba(255,95,210,.6); }
-  .neon-teal { color: #fff; text-shadow: 0 0 2px var(--teal), 0 0 10px var(--teal), 0 0 24px rgba(46,230,214,.55); }
-  .neon-gold { color: var(--gold); text-shadow: 0 0 10px rgba(255,213,74,.7); }
-  .led { font-family: "JetBrains Mono", Menlo, monospace; font-weight: 700; color: var(--sodium); letter-spacing: .5px; }
+  .slab { font-family: "Alfa Slab One", "American Typewriter", Georgia, serif; font-weight: 400; letter-spacing: .5px; line-height: 1.1; }
+  .painted { text-shadow: 2px 2px 0 var(--ink), -1px -1px 0 var(--ink), 0 4px 6px rgba(43,26,16,.35); }
+  .chalk { font-family: "Patrick Hand", "Chalkboard SE", cursive; }
 
-  /* Header */
-  header { position: sticky; top: 0; z-index: 10; background: rgba(8,13,28,.88); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(46,230,214,.25); }
+  header { position: sticky; top: 0; z-index: 10; background: var(--walnut); border-bottom: 4px solid var(--ink); }
   header .wrap { display: flex; align-items: center; gap: 16px; height: 64px; }
-  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: #fff; }
-  .brand img { width: 38px; height: 38px; border-radius: 10px; }
-  .brand span { font: 800 22px "Barlow Condensed", sans-serif; text-transform: uppercase; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--wheat); }
+  .brand img { width: 40px; height: 40px; border-radius: 10px; border: 2px solid var(--ink); }
+  .brand span { font: 22px "Alfa Slab One", serif; }
   nav { margin-left: auto; display: flex; gap: 18px; flex-wrap: wrap; }
-  nav a { color: var(--muted); text-decoration: none; font-weight: 600; font-size: 15px; }
-  nav a:hover { color: var(--teal); }
+  nav a { color: var(--cream); text-decoration: none; font-weight: 800; font-size: 15px; }
+  nav a:hover { color: var(--wheat); }
 
-  /* Hero */
-  .hero { position: relative; overflow: hidden; padding: 70px 0 80px;
-    background: radial-gradient(ellipse at 80% 10%, rgba(255,179,71,.18), transparent 50%),
-                linear-gradient(180deg, var(--night) 0%, var(--night2) 55%, #2a1e45 100%); }
-  .hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 90px;
-    background: repeating-linear-gradient(90deg, rgba(244,241,230,.85) 0 70px, transparent 70px 120px) center 40px / 100% 10px no-repeat, var(--asphalt); }
+  .hero { position: relative; overflow: hidden; padding: 60px 0 120px;
+    background: linear-gradient(180deg, var(--sky) 0%, var(--sky2) 65%, var(--grass) 65%, var(--grassDark) 100%); }
+  .hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 70px; background: var(--dirt);
+    border-top: 6px solid var(--grassDark); }
   .hero .wrap { position: relative; z-index: 1; display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: center; }
-  .hero h1 { margin: 18px 0 12px; font-size: clamp(44px, 7vw, 82px); }
-  .hero p.lead { font-size: 20px; color: var(--cream); max-width: 560px; }
+  .hero h1 { margin: 18px 0 12px; font-size: clamp(42px, 6.5vw, 76px); color: var(--cream); }
+  .hero p.lead { font-size: 20px; color: var(--ink); max-width: 560px; background: rgba(255,246,224,.85); border-radius: 16px; padding: 14px 18px; border: 3px solid var(--ink); }
   .logo { max-width: 420px; }
-  .badge { display: inline-flex; align-items: center; gap: 12px; margin-top: 26px; padding: 12px 20px; border-radius: 16px;
-    background: var(--panel); border: 2px solid var(--teal); box-shadow: 0 0 18px rgba(46,230,214,.35); }
-  .badge img { width: 40px; height: 40px; }
-  .badge b { display: block; font: 800 22px "Barlow Condensed", sans-serif; text-transform: uppercase; color: var(--teal); }
-  .badge small { color: var(--muted); font-size: 14px; }
-  .phone { width: min(330px, 80vw); margin: 0 auto; padding: 12px; border-radius: 48px; background: #05060a;
-    border: 3px solid #2c2f3a; box-shadow: 0 0 0 6px #14161d, 0 30px 70px rgba(0,0,0,.6), 0 0 40px rgba(255,95,210,.25); }
+  .badge { display: inline-flex; align-items: center; gap: 12px; margin-top: 22px; padding: 12px 20px; border-radius: 16px;
+    background: var(--walnut); border: 3px solid var(--ink); box-shadow: 0 5px 0 var(--ink); color: var(--cream); }
+  .badge img { width: 44px; height: 44px; }
+  .badge b { display: block; font: 20px "Alfa Slab One", serif; color: var(--wheat); }
+  .badge small { color: var(--chalk); font-size: 14px; }
+  .phone { width: min(330px, 80vw); margin: 0 auto; padding: 12px; border-radius: 48px; background: var(--walnut);
+    border: 4px solid var(--ink); box-shadow: 0 10px 0 var(--ink), 0 30px 60px rgba(43,26,16,.35); }
   .phone img { border-radius: 36px; }
 
-  section { padding: 84px 0; }
-  section.alt { background: linear-gradient(180deg, #0c1226, #0a0f20); }
-  .kicker { display: inline-block; margin-bottom: 10px; }
-  h2 { font-size: clamp(34px, 5vw, 54px); margin: 0 0 14px; }
-  .sub { color: var(--muted); max-width: 680px; margin: 0 0 36px; font-size: 18px; }
+  section { padding: 80px 0; }
+  section.wood { background: repeating-linear-gradient(0deg, #c08a52 0 70px, #b37d48 70px 72px); }
+  section.barn { background: repeating-linear-gradient(90deg, var(--barn) 0 110px, var(--barnDark) 110px 114px); }
+  section.field { background: linear-gradient(180deg, var(--sky2), #e9f6d8); }
+  .kicker { display: inline-block; margin-bottom: 10px; font: 20px "Patrick Hand", cursive; color: var(--barn); }
+  section.barn .kicker, section.wood .kicker { color: var(--wheat); }
+  h2 { font-size: clamp(32px, 4.6vw, 50px); margin: 0 0 14px; color: var(--cream); }
+  .sub { color: var(--muted); max-width: 680px; margin: 0 0 34px; font-size: 18px; }
+  section.barn .sub, section.wood .sub { color: var(--cream); text-shadow: 0 1px 2px rgba(43,26,16,.6); }
   .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   .grid5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
-  .card { background: var(--panel); border-radius: 22px; padding: 22px; border: 2px solid rgba(255,255,255,.08); }
-  .card h3 { margin: 12px 0 6px; font: 800 24px "Barlow Condensed", sans-serif; text-transform: uppercase; }
-  .card p { margin: 0; color: var(--muted); }
-  .card .art { width: 72px; height: 72px; object-fit: contain; }
-  .card.pink { border-color: rgba(255,95,210,.6); box-shadow: 0 0 18px rgba(255,95,210,.18); }
-  .card.teal { border-color: rgba(46,230,214,.6); box-shadow: 0 0 18px rgba(46,230,214,.15); }
-  .card.gold { border-color: rgba(255,213,74,.6); box-shadow: 0 0 18px rgba(255,213,74,.15); }
+  .card { background: var(--walnut); color: var(--cream); border-radius: 20px; padding: 22px; border: 4px solid var(--ink); box-shadow: 0 6px 0 var(--ink); }
+  .card h3 { margin: 12px 0 6px; font: 22px "Alfa Slab One", serif; color: var(--wheat); }
+  .card p { margin: 0; color: var(--chalk); }
+  .card .art { width: 76px; height: 76px; object-fit: contain; }
+  .mech img { border-radius: 12px; aspect-ratio: 720/420; object-fit: cover; border: 3px solid var(--ink); }
 
-  /* Street-sign steps */
   .steps { display: grid; gap: 14px; max-width: 760px; }
-  .step { display: flex; gap: 18px; align-items: center; background: var(--sign); color: #fff; padding: 16px 70px 16px 20px;
-    border: 4px solid #fff; outline: 2px solid var(--ink); border-radius: 10px;
-    clip-path: polygon(0 0, calc(100% - 40px) 0, 100% 50%, calc(100% - 40px) 100%, 0 100%); }
-  .step .n { font: 800 44px "Barlow Condensed", sans-serif; color: var(--gold); min-width: 34px; }
-  .step b { font: 800 24px "Barlow Condensed", sans-serif; text-transform: uppercase; display: block; }
-  .step span { color: #e6f4ec; }
+  .step { display: flex; gap: 18px; align-items: center; background: #9a6334; color: var(--cream); padding: 16px 70px 16px 20px;
+    border: 4px solid var(--ink); border-radius: 10px; clip-path: polygon(0 0, calc(100% - 40px) 0, 100% 50%, calc(100% - 40px) 100%, 0 100%); }
+  .step .n { font: 44px "Alfa Slab One", serif; color: var(--wheat); min-width: 34px; }
+  .step b { font: 22px "Alfa Slab One", serif; display: block; color: var(--wheat); }
 
-  /* Mechanics */
-  .mech { display: flex; flex-direction: column; }
-  .mech img { border-radius: 14px; aspect-ratio: 720/420; object-fit: cover; }
-  .mech .tag { margin-top: 12px; font-size: 13px; }
-
-  /* Hens & districts */
   .hens { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
-  .hen { text-align: center; background: linear-gradient(180deg, #ffd88a, var(--sodium)); border-radius: 16px; padding: 10px 6px 12px; border: 4px solid var(--ink); color: var(--ink); }
-  .hen img { width: 100%; }
-  .hen b { font: 800 20px "Barlow Condensed", sans-serif; text-transform: uppercase; }
+  .hen { text-align: center; background: linear-gradient(180deg, #fff1b8, var(--wheat)); border-radius: 16px; padding: 10px 6px 12px; border: 4px solid var(--ink); }
+  .hen b { font: 18px "Alfa Slab One", serif; }
   .hen small { display: block; font-size: 13px; line-height: 1.3; }
   .districts { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-top: 30px; }
   .district img { border-radius: 14px; }
-  .district b { display: block; margin-top: 8px; font: 800 19px "Barlow Condensed", sans-serif; text-transform: uppercase; }
-  .district small { color: var(--muted); font-size: 14px; }
+  .district b { display: block; margin-top: 8px; font: 18px "Alfa Slab One", serif; color: var(--cream); text-shadow: 0 1px 2px rgba(43,26,16,.7); }
+  .district small { color: var(--cream); font-size: 14px; }
 
-  /* Night shift */
   .shift { display: grid; grid-template-columns: .8fr 1.2fr; gap: 40px; align-items: center; }
-  .lamps { display: flex; gap: 14px; margin: 18px 0; }
-  .lamp { width: 22px; height: 22px; border-radius: 50%; background: #3a3a46; }
-  .lamp.on { background: var(--sodium); box-shadow: 0 0 14px var(--sodium); }
+  .chalkboard { background: var(--board); color: var(--chalk); border: 10px solid var(--wood); border-radius: 18px; padding: 22px; box-shadow: 0 6px 0 var(--ink); font-size: 19px; }
+  .chalkboard b { color: var(--wheat); }
+  .flowers { display: flex; gap: 14px; margin: 16px 0; font-size: 30px; }
+  .flowers .off { filter: grayscale(1); opacity: .45; }
   .rewards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
-  .reward { border: 2px solid var(--pink); border-radius: 14px; padding: 12px; text-align: center; background: var(--panel); }
-  .reward .led { color: var(--pink); }
-  .reward b { display: block; font: 800 20px "Barlow Condensed", sans-serif; text-transform: uppercase; }
+  .reward { border: 3px solid var(--chalk); border-radius: 14px; padding: 10px; text-align: center; }
+  .reward img { width: 54px; margin: 0 auto 4px; }
+  .reward b { display: block; color: var(--wheat); }
 
-  /* Gallery */
   .gallery { display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; }
   figure { margin: 0; }
-  figure img { border-radius: 22px; border: 3px solid #2c2f3a; }
+  figure img { border-radius: 22px; border: 4px solid var(--ink); }
   figcaption { margin-top: 8px; font-size: 14px; color: var(--muted); }
-  figcaption b { color: #fff; display: block; font: 800 17px "Barlow Condensed", sans-serif; text-transform: uppercase; }
+  figcaption b { color: var(--ink); display: block; font: 16px "Alfa Slab One", serif; }
 
-  /* Platforms */
   .chips { display: flex; flex-wrap: wrap; gap: 12px; }
-  .chip { padding: 12px 18px; border-radius: 999px; background: var(--panel); border: 2px solid var(--teal); font-weight: 600; }
+  .chip { padding: 12px 18px; border-radius: 999px; background: var(--walnut); color: var(--wheat); border: 3px solid var(--ink); font-weight: 800; }
 
-  /* Support & legal */
-  .faq details { background: var(--panel); border-radius: 16px; padding: 16px 20px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,.08); }
-  .faq summary { cursor: pointer; font-weight: 600; font-size: 18px; }
-  .faq p { color: var(--muted); margin: 10px 0 0; }
-  .legal { background: var(--cream); color: #1b1d28; border-radius: 24px; padding: 34px; }
-  .legal h2 { color: #1b1d28; font-size: 40px; }
-  .legal h3 { margin: 22px 0 6px; font-size: 19px; }
-  .legal p, .legal li { color: #2b2e3c; }
-  .legal a { color: #b0257f; }
-  .legal .date { font: 700 13px "JetBrains Mono", monospace; color: #6b5a2a; }
-  footer { padding: 40px 0 60px; border-top: 1px solid rgba(255,255,255,.1); color: var(--muted); font-size: 15px; }
+  .faq details { background: var(--walnut); color: var(--cream); border-radius: 16px; padding: 16px 20px; margin-bottom: 12px; border: 3px solid var(--ink); }
+  .faq summary { cursor: pointer; font-weight: 800; font-size: 18px; color: var(--wheat); }
+  .faq p { color: var(--chalk); margin: 10px 0 0; }
+  .legal { background: #fffdf6; color: #2b2e3c; border-radius: 24px; padding: 34px; border: 4px solid var(--ink); }
+  .legal h2 { color: var(--barn); font-size: 38px; }
+  .legal h3 { margin: 22px 0 6px; font-size: 19px; color: var(--ink); }
+  .legal .date { font: 18px "Patrick Hand", cursive; color: var(--muted); }
+  footer { padding: 36px 0 54px; background: var(--walnut); color: var(--chalk); font-size: 15px; border-top: 4px solid var(--ink); }
+  footer a { color: var(--wheat); }
   footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }
   footer nav { margin-left: auto; }
 
@@ -158,7 +141,7 @@
       <a href="#about">About</a>
       <a href="#how">How it works</a>
       <a href="#mechanics">Mechanics</a>
-      <a href="#night-shift">Night Shift</a>
+      <a href="#farm-week">Farm Week</a>
       <a href="#gallery">Screens</a>
       <a href="#support">Support</a>
     </nav>
@@ -170,126 +153,128 @@
     <div class="wrap">
       <div>
         <img class="logo" src="assets/art/logo_wordmark.png" alt="Cluck Crossing">
-        <h1 class="display neon-pink">Cross the city.<br>Keep the eggs.</h1>
-        <p class="lead">A brave hen, a neon city at midnight and a road that never sleeps. Hop lane by lane, read the traffic and decide when to roost your basket before the next set of headlights arrives.</p>
+        <h1 class="slab painted">Cross the farm road.<br>Keep the eggs.</h1>
+        <p class="lead">A brave hen, a busy county road and a whole basket of eggs. Hop lane by lane past tractors, milk vans and combines, then roost on the hay strip before the next one rolls in.</p>
         <div class="badge">
           <img src="assets/art/signal_walk.png" alt="">
           <div><b>Coming soon on the App Store</b><small>For iPhone · iOS 15 or later</small></div>
         </div>
       </div>
-      <div class="phone"><img src="assets/screens/v1-run-lanes.jpg" alt="A hen hopping across night-city lanes with neon multiplier plaques"></div>
+      <div class="phone"><img src="assets/screens/v2-run-lanes.jpg" alt="A hen hopping across farm-road lanes past tractors"></div>
     </div>
   </section>
 
-  <section id="about">
+  <section id="about" class="field">
     <div class="wrap">
-      <span class="kicker led">ABOUT THE GAME</span>
-      <h2 class="display neon-teal">A street-smart arcade</h2>
-      <p class="sub">Cluck Crossing starts gently on a sleepy suburban lane and ends on a pitch-black expressway. Every district adds a new hazard, so skill grows with the city.</p>
+      <span class="kicker">About the game</span>
+      <h2 class="slab painted">A barnyard arcade</h2>
+      <p class="sub">Cluck Crossing starts on a sleepy meadow lane and ends in a foggy hollow full of fast tractors. Every district adds a new hazard, so your skill grows with the farm.</p>
       <div class="grid3">
-        <div class="card teal"><img class="art" src="assets/art/hen_pepper.png" alt=""><h3>Easy to start</h3><p>Tap to hop, swipe to sidestep. The first crossings are slow and wide, so you can learn the rhythm of the road.</p></div>
-        <div class="card pink"><img class="art" src="assets/art/egg.png" alt=""><h3>Hard to master</h3><p>The longer you go without roosting, the more each lane is worth. Push your luck, or bank it on the next island.</p></div>
-        <div class="card gold"><img class="art" src="assets/art/coin.png" alt=""><h3>Fair and offline</h3><p>Coins are earned only by playing and are spent on gear and hens. No ads, no purchases, no real money anywhere.</p></div>
+        <div class="card"><img class="art" src="assets/art/hen_pepper.png" alt=""><h3>Easy to start</h3><p>Tap to hop, swipe to sidestep. The first crossings are slow and wide, so you can learn the rhythm of the road.</p></div>
+        <div class="card"><img class="art" src="assets/art/egg.png" alt=""><h3>Hard to master</h3><p>The longer you go without roosting, the more each lane is worth. Push your luck, or bank it on the next hay strip.</p></div>
+        <div class="card"><img class="art" src="assets/art/coin.png" alt=""><h3>Fair and offline</h3><p>Coins are earned only by playing and are spent on gear and hens. No ads, no purchases, no real money anywhere.</p></div>
       </div>
     </div>
   </section>
 
-  <section id="how" class="alt">
+  <section id="how" class="wood">
     <div class="wrap">
-      <span class="kicker led">HOW IT WORKS</span>
-      <h2 class="display neon-gold">Three signs to follow</h2>
-      <p class="sub">Every crossing is a short, tense run from curb to curb.</p>
+      <span class="kicker">How it works</span>
+      <h2 class="slab painted">Follow the signs</h2>
+      <p class="sub">Every crossing is a short, tense trip from the meadow to the coop.</p>
       <div class="steps">
-        <div class="step"><span class="n">1</span><div><b>Hop the lanes</b><span>Tap to hop forward, swipe left or right to sidestep and down to step back. Cars only hurt you in your own lane.</span></div></div>
-        <div class="step"><span class="n">2</span><div><b>Roost on the islands</b><span>Each new lane lays an egg. Tap ROOST on a traffic island to bank your basket. A bump loses everything not yet banked.</span></div></div>
-        <div class="step"><span class="n">3</span><div><b>Earn stars and coins</b><span>Reach the far curb for a star, bank par for two, and dare to skip islands for three. Spend coins at the vending machine.</span></div></div>
+        <div class="step"><span class="n">1</span><div><b>Hop the lanes</b><span>Tap to hop forward, swipe left or right to sidestep and down to step back. Vehicles only hurt you in your own lane.</span></div></div>
+        <div class="step"><span class="n">2</span><div><b>Roost on the hay strips</b><span>Each new lane lays an egg. Tap ROOST on a hay strip to bank your basket. A bump loses everything not yet banked.</span></div></div>
+        <div class="step"><span class="n">3</span><div><b>Earn stars and coins</b><span>Reach the coop for a star, bank par for two, and dare to skip hay strips for three. Spend coins at the Feed Store.</span></div></div>
       </div>
     </div>
   </section>
 
-  <section id="mechanics">
+  <section id="mechanics" class="field">
     <div class="wrap">
-      <span class="kicker led">SIGNATURE MECHANICS</span>
-      <h2 class="display neon-pink">Five rules of the night</h2>
+      <span class="kicker">Signature mechanics</span>
+      <h2 class="slab painted">Five rules of the road</h2>
       <p class="sub">Each one changes how you read the road, and they work together.</p>
       <div class="grid5">
-        <div class="card pink mech"><img src="assets/art/tut_roost.png" alt=""><h3>Clutch Climb &amp; Roost</h3><p>The multiplier climbs with every lane in a streak. Only roosting on an island makes it safe.</p></div>
-        <div class="card gold mech"><img src="assets/art/tut_manhole.png" alt=""><h3>Manhole Flares</h3><p>Lids glow orange, then shoot fire. Step aside and wait for them to cool.</p></div>
-        <div class="card teal mech"><img src="assets/art/tut_whistle.png" alt=""><h3>Crossing Guard Whistle</h3><p>Grain fills the whistle. Blow it to freeze three lanes, then cross before they rush back.</p></div>
-        <div class="card gold mech"><img src="assets/art/tut_truck.png" alt=""><h3>Corn Truck Spill</h3><p>A honk warns of a long truck. It spills corn: grain, coins and cooler feet.</p></div>
-        <div class="card pink mech"><img src="assets/art/tut_heat.png" alt=""><h3>Hot Asphalt</h3><p>On hot roads your feet heat up. Wait too long and you hop forward on your own.</p></div>
+        <div class="card mech"><img src="assets/art/tut_roost.png" alt=""><h3>Basket Climb &amp; Roost</h3><p>The multiplier climbs with every lane in a streak. Only roosting on a hay strip makes it safe.</p></div>
+        <div class="card mech"><img src="assets/art/tut_sprinkler.png" alt=""><h3>Sprinkler Bursts</h3><p>Sprinklers gurgle, then shoot a jet of water. Step aside and wait for them to stop.</p></div>
+        <div class="card mech"><img src="assets/art/tut_bell.png" alt=""><h3>Farm Bell</h3><p>Grain fills the bell. Ring it to hold three lanes, then cross before they rush again.</p></div>
+        <div class="card mech"><img src="assets/art/tut_truck.png" alt=""><h3>Corn Truck Spill</h3><p>A honk warns of a long truck. It spills corn: grain, coins and cooler feet.</p></div>
+        <div class="card mech"><img src="assets/art/tut_heat.png" alt=""><h3>Hot Gravel</h3><p>On sunbaked roads your feet heat up. Wait too long and you hop forward on your own.</p></div>
       </div>
     </div>
   </section>
 
-  <section id="world" class="alt">
+  <section id="world" class="barn">
     <div class="wrap">
-      <span class="kicker led">HENS &amp; DISTRICTS</span>
-      <h2 class="display neon-gold">Six hens, five districts</h2>
-      <p class="sub">Every hen brings her own perk. Thirty crossings lead from Sleepy Lane to the Midnight Expressway.</p>
+      <span class="kicker">Hens &amp; districts</span>
+      <h2 class="slab painted">Six hens, five districts</h2>
+      <p class="sub">Every hen brings her own perk. Thirty crossings lead from Meadow Lane to Foggy Hollow.</p>
       <div class="hens">
-        <div class="hen"><img src="assets/art/hen_pepper.png" alt=""><b>Pepper</b><small>Balanced street smarts</small></div>
-        <div class="hen"><img src="assets/art/hen_dot.png" alt=""><b>Dot</b><small>Starts with a half-full whistle</small></div>
+        <div class="hen"><img src="assets/art/hen_pepper.png" alt=""><b>Pepper</b><small>Balanced farm smarts</small></div>
+        <div class="hen"><img src="assets/art/hen_dot.png" alt=""><b>Dot</b><small>Starts with a half-full bell</small></div>
         <div class="hen"><img src="assets/art/hen_sunny.png" alt=""><b>Sunny</b><small>Feet heat 20% slower</small></div>
         <div class="hen"><img src="assets/art/hen_comet.png" alt=""><b>Comet</b><small>Multiplier climbs faster</small></div>
         <div class="hen"><img src="assets/art/hen_inkwell.png" alt=""><b>Inkwell</b><small>Longer shield after a bump</small></div>
         <div class="hen"><img src="assets/art/hen_duchess.png" alt=""><b>Duchess</b><small>One extra feather</small></div>
       </div>
       <div class="districts">
-        <div class="district"><img src="assets/art/district_sleepy.png" alt=""><b>Sleepy Lane</b><small>Learn the rhythm</small></div>
-        <div class="district"><img src="assets/art/district_market.png" alt=""><b>Market Street</b><small>Corn trucks</small></div>
-        <div class="district"><img src="assets/art/district_steam.png" alt=""><b>Steam Quarter</b><small>Flaring manholes</small></div>
-        <div class="district"><img src="assets/art/district_neon.png" alt=""><b>Neon Boulevard</b><small>Hot asphalt</small></div>
-        <div class="district"><img src="assets/art/district_midnight.png" alt=""><b>Midnight Expressway</b><small>Only headlights</small></div>
+        <div class="district"><img src="assets/art/district_meadow.png" alt=""><b>Meadow Lane</b><small>Learn the rhythm</small></div>
+        <div class="district"><img src="assets/art/district_harvest.png" alt=""><b>Harvest Road</b><small>Corn trucks</small></div>
+        <div class="district"><img src="assets/art/district_orchard.png" alt=""><b>Orchard Row</b><small>Sprinklers</small></div>
+        <div class="district"><img src="assets/art/district_gravel.png" alt=""><b>Sunbaked Gravel</b><small>Hot gravel</small></div>
+        <div class="district"><img src="assets/art/district_fog.png" alt=""><b>Foggy Hollow</b><small>Only fog lights</small></div>
       </div>
     </div>
   </section>
 
-  <section id="night-shift">
+  <section id="farm-week" class="field">
     <div class="wrap shift">
-      <div class="phone"><img src="assets/screens/v1-top-players.jpg" alt="Top Players: the weekly Night Shift roster"></div>
+      <div class="phone"><img src="assets/screens/v2-top-players.jpg" alt="Top Players: the weekly Farm Week roster"></div>
       <div>
-        <span class="kicker led">EVERY WEEK</span>
-        <h2 class="display neon-teal">The Night Shift</h2>
-        <p class="sub">Each week brings a new rule for every run: Corn Harvest, Crossing Guard, Lamp Lighters or Rush Hour week.</p>
-        <p><b>Lamp Lighter.</b> Every night you play lights a street lamp on your block. Light 3, 5 or 7 in a week to collect a coin bundle.</p>
-        <div class="lamps"><span class="lamp on"></span><span class="lamp on"></span><span class="lamp on"></span><span class="lamp on"></span><span class="lamp"></span><span class="lamp"></span><span class="lamp"></span></div>
-        <p><b>Top Players.</b> The weekly roster shows the five best crossings of the week and its reward slots. In this first version the roster shows sample rivals; the live weekly roster arrives in a later update.</p>
-        <div class="rewards">
-          <div class="reward"><span class="led">#1</span><b>Golden Comb</b></div>
-          <div class="reward"><span class="led">#2–3</span><b>Neon Feather</b></div>
-          <div class="reward"><span class="led">#4–5</span><b>Whistle Pin</b></div>
+        <span class="kicker">Every week</span>
+        <h2 class="slab painted">Farm Week</h2>
+        <div class="chalkboard chalk">
+          <p>Each week brings a new rule for every run: <b>Corn Harvest</b>, <b>Bell Ringer</b>, <b>Egg Basket</b> or <b>Market Day</b> week.</p>
+          <p><b>Sunflower Row.</b> Every day you play, a sunflower blooms along the fence. Grow 3, 5 or 7 in a week to collect a coin bundle.</p>
+          <div class="flowers"><span>🌻</span><span>🌻</span><span>🌻</span><span>🌻</span><span class="off">🌻</span><span class="off">🌻</span><span class="off">🌻</span></div>
+          <p><b>Top Players.</b> The weekly roster shows the five best crossings of the week and its reward slots. In this first version the roster shows sample rivals; the live weekly roster arrives in a later update.</p>
+          <div class="rewards">
+            <div class="reward"><img src="assets/art/ribbon_2.png" alt=""><span>#1</span><b>Golden Comb</b></div>
+            <div class="reward"><img src="assets/art/ribbon_0.png" alt=""><span>#2–3</span><b>Golden Feather</b></div>
+            <div class="reward"><img src="assets/art/ribbon_1.png" alt=""><span>#4–5</span><b>Brass Bell Pin</b></div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="gallery" class="alt">
+  <section id="gallery" class="wood">
     <div class="wrap">
-      <span class="kicker led">SCREENS</span>
-      <h2 class="display neon-pink">A walk around the block</h2>
+      <span class="kicker">Screens</span>
+      <h2 class="slab painted">A walk around the farm</h2>
       <p class="sub">Real captures from the game.</p>
       <div class="gallery">
-        <figure><img src="assets/screens/v1-corner.jpg" alt="Street corner home screen"><figcaption><b>Street corner</b>Signposts, the WALK signal and this week's Night Shift.</figcaption></figure>
-        <figure><img src="assets/screens/v1-run-lanes.jpg" alt="Hopping lanes"><figcaption><b>On the road</b>Neon plaques show what each lane is worth.</figcaption></figure>
-        <figure><img src="assets/screens/v1-run-corn-truck.jpg" alt="Corn trucks"><figcaption><b>Market Street</b>Long corn trucks spill kernels behind them.</figcaption></figure>
-        <figure><img src="assets/screens/v1-speed-camera.jpg" alt="Speed camera result"><figcaption><b>Speed camera</b>Every crossing ends with a flash photo and your haul.</figcaption></figure>
-        <figure><img src="assets/screens/v1-timetable.jpg" alt="Timetable"><figcaption><b>Timetable</b>Thirty crossings on a split-flap departure board.</figcaption></figure>
-        <figure><img src="assets/screens/v1-vending.jpg" alt="Vending machine"><figcaption><b>Vending machine</b>Gel, whistles, baskets and spare feathers.</figcaption></figure>
-        <figure><img src="assets/screens/v1-henhouse.jpg" alt="Henhouse"><figcaption><b>Henhouse</b>Adopt hens from the apartment windows.</figcaption></figure>
-        <figure><img src="assets/screens/v1-billboard.jpg" alt="Billboard"><figcaption><b>Billboard</b>Stats on an LED board, achievements in neon.</figcaption></figure>
-        <figure><img src="assets/screens/v1-top-players.jpg" alt="Top Players"><figcaption><b>Top Players</b>The weekly Night Shift roster.</figcaption></figure>
-        <figure><img src="assets/screens/v1-rulebook.jpg" alt="Rulebook"><figcaption><b>Rulebook</b>Every rule, illustrated.</figcaption></figure>
+        <figure><img src="assets/screens/v2-farmyard.jpg" alt="Farmyard home screen"><figcaption><b>Farmyard</b>Signposts by the barn, the GO! sign and this week's rule.</figcaption></figure>
+        <figure><img src="assets/screens/v2-run-lanes.jpg" alt="Hopping lanes"><figcaption><b>On the road</b>Wooden signs show what each lane is worth.</figcaption></figure>
+        <figure><img src="assets/screens/v2-run-corn-truck.jpg" alt="Corn trucks"><figcaption><b>Harvest Road</b>Long corn trucks spill kernels behind them.</figcaption></figure>
+        <figure><img src="assets/screens/v2-fair-photo.jpg" alt="County fair photo"><figcaption><b>Fair photo</b>Every crossing ends with a pinned photo and your haul.</figcaption></figure>
+        <figure><img src="assets/screens/v2-route-board.jpg" alt="Route board"><figcaption><b>Route board</b>Thirty crossings chalked up by district.</figcaption></figure>
+        <figure><img src="assets/screens/v2-feed-store.jpg" alt="Feed store"><figcaption><b>Feed Store</b>Mud socks, a big brass bell, baskets and feathers.</figcaption></figure>
+        <figure><img src="assets/screens/v2-henhouse.jpg" alt="Henhouse"><figcaption><b>Henhouse</b>Adopt hens from the nest boxes.</figcaption></figure>
+        <figure><img src="assets/screens/v2-barn-wall.jpg" alt="Barn wall"><figcaption><b>Barn Wall</b>Stats on a chalkboard, fair ribbons for achievements.</figcaption></figure>
+        <figure><img src="assets/screens/v2-top-players.jpg" alt="Top Players"><figcaption><b>Top Players</b>The weekly Farm Week roster.</figcaption></figure>
+        <figure><img src="assets/screens/v2-almanac.jpg" alt="Almanac"><figcaption><b>Almanac</b>Every rule, illustrated.</figcaption></figure>
       </div>
     </div>
   </section>
 
-  <section id="platforms">
+  <section id="platforms" class="field">
     <div class="wrap">
-      <span class="kicker led">PLATFORMS</span>
-      <h2 class="display neon-gold">Made for iPhone</h2>
+      <span class="kicker">Platforms</span>
+      <h2 class="slab painted">Made for iPhone</h2>
       <div class="chips">
-        <span class="chip">iPhone</span>
+        <span class="chip">iPhone only</span>
         <span class="chip">iOS 15 or later</span>
         <span class="chip">Plays fully offline</span>
         <span class="chip">No ads</span>
@@ -299,25 +284,25 @@
     </div>
   </section>
 
-  <section id="support" class="alt">
+  <section id="support" class="barn">
     <div class="wrap">
-      <span class="kicker led">SUPPORT</span>
-      <h2 class="display neon-teal">Need a hand crossing?</h2>
-      <p class="sub">Write to <a href="mailto:{{SUPPORT_EMAIL}}">{{SUPPORT_EMAIL}}</a> and we will reply as soon as we can.</p>
+      <span class="kicker">Support</span>
+      <h2 class="slab painted">Need a hand crossing?</h2>
+      <p class="sub">Write to <a href="mailto:{{SUPPORT_EMAIL}}" style="color: var(--wheat)">{{SUPPORT_EMAIL}}</a> and we will reply as soon as we can.</p>
       <div class="faq">
         <details><summary>Is Cluck Crossing a gambling game?</summary><p>No. There are no bets, no prizes and no real money. Coins are earned only by playing and can only be spent on in-game upgrades and hens.</p></details>
-        <details><summary>Do I need an internet connection?</summary><p>No. The whole game, including the Daily Crossing and the Night Shift, works offline.</p></details>
-        <details><summary>How do I get three stars?</summary><p>Bank a daring score. Two stars need par (roosting on every island); three stars need you to skip islands and let the multiplier climb.</p></details>
-        <details><summary>When do Night Run and Daily Crossing unlock?</summary><p>After you finish all six crossings of Sleepy Lane.</p></details>
+        <details><summary>Do I need an internet connection?</summary><p>No. The whole game, including the Daily Crossing and Farm Week, works offline.</p></details>
+        <details><summary>How do I get three stars?</summary><p>Bank a daring score. Two stars need par (roosting on every hay strip); three stars need you to skip hay strips and let the multiplier climb.</p></details>
+        <details><summary>When do Long Road and Daily Crossing unlock?</summary><p>After you finish all six crossings of Meadow Lane.</p></details>
         <details><summary>Is the Top Players roster live?</summary><p>Not yet. The first version shows sample rivals next to your real weekly best. The live weekly roster and its rewards arrive in a later update.</p></details>
-        <details><summary>How do I reset my progress?</summary><p>Open Settings (the gear on the street corner) and choose Reset progress.</p></details>
+        <details><summary>How do I reset my progress?</summary><p>Open Settings (the gear in the farmyard) and choose Reset progress.</p></details>
       </div>
     </div>
   </section>
 
-  <section id="privacy">
+  <section id="privacy" class="field">
     <div class="wrap legal">
-      <h2 class="display">Privacy Policy</h2>
+      <h2 class="slab">Privacy Policy</h2>
       <p class="date">Last updated: November 17, 2026</p>
       <p>Cluck Crossing ("the app") is designed to respect your privacy.</p>
       <h3>Data we collect</h3>
@@ -333,9 +318,9 @@
     </div>
   </section>
 
-  <section id="terms">
+  <section id="terms" class="field">
     <div class="wrap legal">
-      <h2 class="display">Terms of Use</h2>
+      <h2 class="slab">Terms of Use</h2>
       <p class="date">Last updated: November 17, 2026</p>
       <h3>1. Use of the app</h3>
       <p>Cluck Crossing is licensed to you for personal, non-commercial entertainment on devices you own or control, subject to the Apple Media Services Terms.</p>

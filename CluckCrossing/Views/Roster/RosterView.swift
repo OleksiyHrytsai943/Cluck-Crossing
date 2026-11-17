@@ -1,8 +1,8 @@
 import SwiftUI
 import WebKit
 
-/// TOP PLAYERS: the weekly Night Shift roster rendered by a local HTML template in a WebView,
-/// with native Lamp Lighter claim buttons underneath.
+/// TOP PLAYERS: the weekly Farm Week roster rendered by a local HTML template in a WebView,
+/// with native Sunflower Row claim buttons underneath.
 struct RosterView: View {
     @StateObject private var viewModel: RosterViewModel
     @ObservedObject private var store: ProfileStore
@@ -17,7 +17,7 @@ struct RosterView: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            StreetHeader(title: "TOP PLAYERS", color: Theme.eggGold, coins: store.coins, onBack: router.back)
+            FarmHeader(title: "TOP PLAYERS", color: Theme.wheat, coins: store.coins, onBack: router.back)
             ZStack {
                 RosterWebView(json: viewModel.pageJSON)
                     .accessibilityIdentifier(AccessibilityID.rosterWeb)
@@ -30,32 +30,32 @@ struct RosterView: View {
                 }
             }
             .padding(.horizontal, 12)
-            lampClaims
+            sunflowerClaims
         }
         .frame(maxWidth: Theme.maxContentWidth)
         .frame(maxWidth: .infinity)
-        .backdrop("billboard_backdrop", dim: 0.35)
+        .backdrop("billboard_backdrop", dim: 0.1)
         .task { await viewModel.load() }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.rosterScreen)
     }
 
-    private var lampClaims: some View {
+    private var sunflowerClaims: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("LAMP LIGHTER · \(viewModel.lampsLit)/\(LampLighter.lampsPerWeek) LIT")
-                .font(Theme.led(13))
-                .foregroundColor(Theme.sodium)
-                .accessibilityIdentifier(AccessibilityID.rosterLamps)
+            Text("SUNFLOWER ROW · \(viewModel.sunflowersLit)/\(SunflowerRow.sunflowersPerWeek) IN BLOOM")
+                .font(Theme.chalkFont(13))
+                .foregroundColor(Theme.pumpkin)
+                .accessibilityIdentifier(AccessibilityID.rosterSunflowers)
             HStack(spacing: 8) {
-                ForEach(LampLighter.tiers) { tier in
-                    let claimed = store.isLampTierClaimed(tier)
-                    let ready = viewModel.lampsLit >= tier.lamps && !claimed
+                ForEach(SunflowerRow.tiers) { tier in
+                    let claimed = store.isSunflowerTierClaimed(tier)
+                    let ready = viewModel.sunflowersLit >= tier.sunflowers && !claimed
                     Button {
                         Task { router.show(toast: await viewModel.claim(tier)) }
                     } label: {
                         VStack(spacing: 1) {
-                            Text("\(tier.lamps) LAMPS")
-                                .font(Theme.led(12))
+                            Text("\(tier.sunflowers) SUNFLOWERS")
+                                .font(Theme.chalkFont(12))
                             HStack(spacing: 3) {
                                 Image("coin").resizable().frame(width: 14, height: 14)
                                 Text(claimed ? "Claimed" : "\(tier.coins)")
@@ -64,13 +64,13 @@ struct RosterView: View {
                         }
                         .foregroundColor(ready ? Theme.ink : .white)
                         .frame(maxWidth: .infinity, minHeight: 54)
-                        .background(RoundedRectangle(cornerRadius: 14).fill(ready ? Theme.sodium : Theme.panel.opacity(0.95)))
-                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.sodium.opacity(claimed ? 0.3 : 0.9), lineWidth: 2))
+                        .background(RoundedRectangle(cornerRadius: 14).fill(ready ? Theme.pumpkin : Theme.panel.opacity(0.95)))
+                        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.pumpkin.opacity(claimed ? 0.3 : 0.9), lineWidth: 2))
                     }
                     .buttonStyle(WalkSignalButtonStyle())
-                    .accessibilityLabel(claimed ? "\(tier.lamps) lamps reward claimed" : "Claim \(tier.coins) coins for \(tier.lamps) lamps")
+                    .accessibilityLabel(claimed ? "\(tier.sunflowers) sunflowers reward claimed" : "Claim \(tier.coins) coins for \(tier.sunflowers) sunflowers")
                     .accessibilityValue(ready ? "Ready" : claimed ? "Claimed" : "Locked")
-                    .accessibilityIdentifier(AccessibilityID.lampClaim(tier.lamps))
+                    .accessibilityIdentifier(AccessibilityID.sunflowerClaim(tier.sunflowers))
                 }
             }
         }

@@ -4,7 +4,7 @@ import Foundation
 enum RowKind: Equatable {
     case curb
     case lane
-    /// Traffic island: safe, cools the feet, the only place to Roost.
+    /// Hay strip: safe, cools the feet, the only place to Roost.
     case island
     case finish
 
@@ -12,14 +12,14 @@ enum RowKind: Equatable {
 }
 
 enum CarKind: String, CaseIterable {
-    case sedan, taxi, van, bus, cornTruck
+    case pickup, tractor, milkVan, combine, cornTruck
 
     /// Length in road columns (the hen is one column wide).
     var length: Double {
         switch self {
-        case .sedan, .taxi: 1.15
-        case .van: 1.5
-        case .bus: 2.3
+        case .pickup, .tractor: 1.15
+        case .milkVan: 1.5
+        case .combine: 2.3
         case .cornTruck: 2.6
         }
     }
@@ -36,24 +36,24 @@ struct Car: Identifiable, Equatable {
     var length: Double { kind.length }
 }
 
-enum ManholePhase: Equatable { case idle, glow, flare }
+enum SprinklerPhase: Equatable { case idle, gurgle, spray }
 
-/// Manhole Flares: a lid on one column that glows (warning) and then flares (dangerous) on a loop.
-struct Manhole: Equatable {
-    static let glowTime = 0.9
-    static let flareTime = 0.8
+/// Sprinkler Bursts: a sprinkler on one column that gurgles (warning) and then sprays (dangerous) on a loop.
+struct Sprinkler: Equatable {
+    static let gurgleTime = 0.9
+    static let sprayTime = 0.8
 
     let column: Int
     let idleTime: Double
     let offset: Double
 
-    var period: Double { idleTime + Self.glowTime + Self.flareTime }
+    var period: Double { idleTime + Self.gurgleTime + Self.sprayTime }
 
-    func phase(at time: Double) -> ManholePhase {
+    func phase(at time: Double) -> SprinklerPhase {
         let p = (time + offset).truncatingRemainder(dividingBy: period)
         if p < idleTime { return .idle }
-        if p < idleTime + Self.glowTime { return .glow }
-        return .flare
+        if p < idleTime + Self.gurgleTime { return .gurgle }
+        return .spray
     }
 }
 
@@ -79,12 +79,12 @@ struct LaneState {
     let baseSpeed: Double
     let minGap: Double
     let maxGap: Double
-    let busChance: Double
-    /// Hot Asphalt heats the feet on this lane.
+    let combineChance: Double
+    /// Hot Gravel heats the feet on this lane.
     let isHot: Bool
     var cars: [Car] = []
     var spawnCountdown = 0.0
-    var manhole: Manhole?
+    var sprinkler: Sprinkler?
     var truck: TruckPhase = .none
     var spillColumns: [Int] = []
     var kernels: [Kernel] = []
@@ -112,7 +112,7 @@ struct LaneState {
 
 enum HitCause: Equatable {
     case car(CarKind)
-    case flare
+    case spray
 }
 
 /// Things that happened during an update; the scene turns them into effects and sounds.
@@ -121,7 +121,7 @@ enum RunEvent: Equatable {
     case laneScored(row: Int, points: Int, multiplier: Double)
     case roosted(amount: Int)
     case kernel(row: Int, column: Int)
-    case whistle(rows: [Int])
+    case bell(rows: [Int])
     case honk(row: Int)
     case hit(cause: HitCause, lostClutch: Int)
     case finished
@@ -134,5 +134,5 @@ enum RunOutcome: Equatable {
 }
 
 enum PilotAction: Equatable {
-    case forward, back, left, right, roost, whistle
+    case forward, back, left, right, roost, bell
 }

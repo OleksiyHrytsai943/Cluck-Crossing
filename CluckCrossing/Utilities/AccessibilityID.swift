@@ -4,7 +4,7 @@ import Foundation
 enum AccessibilityID {
     static let cornerScreen = "corner.screen"
     static let walkButton = "corner.walk"
-    static let nightRunButton = "corner.nightRun"
+    static let longRoadButton = "corner.longRoad"
     static let dailyButton = "corner.daily"
     static let settingsButton = "corner.settings"
     static let coinsBadge = "coins.badge"
@@ -31,8 +31,8 @@ enum AccessibilityID {
 
     static let rosterScreen = "roster.screen"
     static let rosterWeb = "roster.web"
-    static let rosterLamps = "roster.lamps"
-    static func lampClaim(_ lamps: Int) -> String { "roster.claim.\(lamps)" }
+    static let rosterSunflowers = "roster.sunflowers"
+    static func sunflowerClaim(_ sunflowers: Int) -> String { "roster.claim.\(sunflowers)" }
     static let shiftStrip = "corner.shift"
 
     static let rulebookScreen = "rulebook.screen"
@@ -46,7 +46,7 @@ enum AccessibilityID {
 
     static let gameScreen = "game.screen"
     static let pauseButton = "game.pause"
-    static let whistleButton = "game.whistle"
+    static let bellButton = "game.bell"
     static let roostButton = "game.roost"
     static let scoreLabel = "game.score"
     static let clutchLabel = "game.clutch"

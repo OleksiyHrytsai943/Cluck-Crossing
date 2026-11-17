@@ -120,20 +120,24 @@ for (i, f) in [1250.0].enumerated() {
     _ = i
     write("sfx_kernel", b, gain: 0.5)
 }
-do { // Crossing-guard whistle: trilled high tone.
-    var w = tone(.sine, 2900, 3000, 0.55, attack: 0.01, decay: 0.7, vibrato: 140, vibRate: 32)
-    w.add(noiseBurst(0.55, attack: 0.02, lowpass: 0.9, highpass: 0.9, curve: 1), at: 0, gain: 0.08)
-    write("sfx_whistle", w, gain: 0.45)
+do { // Farm bell: bright bronze strike with long ring.
+    var b = Buffer(1.4)
+    for (f, g) in [(880.0, 1.0), (1318.5, 0.5), (2093.0, 0.3), (2637.0, 0.18)] {
+        b.add(tone(.sine, f, f * 0.998, 1.35, attack: 0.002, decay: 1.4, vibrato: 2, vibRate: 5), at: 0, gain: g)
+    }
+    b.add(noiseBurst(0.03, lowpass: 0.9), at: 0, gain: 0.25)
+    write("sfx_bell", b, gain: 0.55)
 }
 do { // Truck horn: low two-tone.
     var b = Buffer(0.7)
     for f in [196.0, 247.0] { var h = tone(.saw, f, f, 0.65, attack: 0.02, decay: 0.9); lowpass(&h, 0.08); b.add(h, at: 0, gain: 0.5) }
     write("sfx_honk", b, gain: 0.6)
 }
-do { // Manhole flare: whoomph.
-    var b = noiseBurst(0.6, attack: 0.04, lowpass: 0.12, curve: 1.6)
-    b.add(tone(.sine, 90, 50, 0.4, attack: 0.01), at: 0, gain: 0.8)
-    write("sfx_flare", b, gain: 0.7)
+do { // Sprinkler burst: hissing splash.
+    var b = noiseBurst(0.7, attack: 0.02, lowpass: 0.7, highpass: 0.85, curve: 1.4)
+    for i in 0..<b.count { b.s[i] *= 0.7 + 0.3 * sin(2 * .pi * 18 * Double(i) / rate) }
+    b.add(tone(.sine, 520, 260, 0.2, attack: 0.005), at: 0, gain: 0.25)
+    write("sfx_spray", b, gain: 0.6)
 }
 do { // Bump: thump + squawk.
     var b = Buffer(0.6)
@@ -203,28 +207,28 @@ func renderLoop(bpm: Double, bars: Int, lead: [(Double, Int, Double)], bass: [(D
     return b
 }
 
-do { // Run loop: night-drive pulse, 8 bars at 140 bpm in A minor.
-    let prog = [45, 45, 41, 41, 43, 43, 40, 40] // Am Am F F G G E E (night drive)
+do { // Run loop: bouncy country two-step, 8 bars at 140 bpm in G major.
+    let prog = [43, 43, 48, 48, 43, 43, 50, 50] // G G C C G G D D (country two-step)
     var bass: [(Double, Int, Double)] = []
     for (bar, root) in prog.enumerated() { for k in 0..<4 { bass.append((Double(bar * 4 + k), root + (k % 2 == 1 ? 7 : 0), 0.9)) } }
     let phrase: [(Double, Int, Double)] = [
-        (0, 69, 0.5), (0.5, 72, 0.5), (1, 76, 1), (2, 74, 0.5), (2.5, 72, 0.5), (3, 69, 1),
-        (4, 72, 0.5), (4.5, 76, 0.5), (5, 77, 1), (6, 76, 0.5), (6.5, 74, 0.5), (7, 72, 1),
-        (8, 74, 0.75), (8.75, 74, 0.25), (9, 79, 0.5), (9.5, 77, 0.5), (10, 76, 1), (11, 74, 1),
-        (12, 71, 0.5), (12.5, 74, 0.5), (13, 76, 0.5), (13.5, 80, 0.5), (14, 76, 1), (15, 71, 1),
+        (0, 67, 0.5), (0.5, 71, 0.5), (1, 74, 1), (2, 76, 0.5), (2.5, 74, 0.5), (3, 71, 1),
+        (4, 72, 0.5), (4.5, 76, 0.5), (5, 79, 1), (6, 76, 0.5), (6.5, 72, 0.5), (7, 76, 1),
+        (8, 74, 0.75), (8.75, 74, 0.25), (9, 71, 0.5), (9.5, 67, 0.5), (10, 71, 1), (11, 74, 1),
+        (12, 74, 0.5), (12.5, 78, 0.5), (13, 81, 0.5), (13.5, 78, 0.5), (14, 74, 1), (15, 67, 1),
     ]
     let lead = phrase + phrase.map { ($0.0 + 16, $0.1, $0.2) }
     write("music_run", renderLoop(bpm: 140, bars: 8, lead: lead, bass: bass, hats: true, leadWave: .square, gain: 1), gain: 0.55)
 }
-do { // Menu loop: late-night lounge, 8 bars at 100 bpm.
-    let prog = [45, 50, 43, 48, 45, 50, 52, 52] // Am Dm G C Am Dm E E (lounge)
+do { // Menu loop: lazy front-porch shuffle, 8 bars at 100 bpm.
+    let prog = [43, 48, 43, 50, 43, 48, 50, 43] // G C G D G C D G (porch waltz-shuffle)
     var bass: [(Double, Int, Double)] = []
     for (bar, root) in prog.enumerated() { bass.append((Double(bar * 4), root, 1.4)); bass.append((Double(bar * 4 + 2), root + 7, 1.4)) }
     let lead: [(Double, Int, Double)] = [
-        (0, 76, 1.5), (1.5, 74, 0.5), (2, 72, 2), (4, 77, 1), (5, 74, 1), (6, 72, 2),
-        (8, 74, 1.5), (9.5, 72, 0.5), (10, 71, 2), (12, 72, 1), (13, 74, 1), (14, 76, 2),
-        (16, 76, 1.5), (17.5, 74, 0.5), (18, 72, 2), (20, 77, 1), (21, 76, 1), (22, 74, 2),
-        (24, 76, 1.5), (25.5, 74, 0.5), (26, 71, 1), (27, 68, 1), (28, 71, 2), (30, 69, 2),
+        (0, 71, 1.5), (1.5, 74, 0.5), (2, 79, 2), (4, 76, 1), (5, 72, 1), (6, 76, 2),
+        (8, 74, 1.5), (9.5, 71, 0.5), (10, 67, 2), (12, 74, 1), (13, 78, 1), (14, 81, 2),
+        (16, 79, 1.5), (17.5, 76, 0.5), (18, 74, 2), (20, 72, 1), (21, 76, 1), (22, 79, 2),
+        (24, 78, 1.5), (25.5, 76, 0.5), (26, 74, 1), (27, 72, 1), (28, 71, 2), (30, 67, 2),
     ]
     write("music_menu", renderLoop(bpm: 100, bars: 8, lead: lead, bass: bass, hats: false, leadWave: .triangle, gain: 1), gain: 0.5)
 }

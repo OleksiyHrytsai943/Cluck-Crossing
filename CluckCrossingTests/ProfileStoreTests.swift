@@ -5,9 +5,9 @@ import UIKit
 
 @MainActor
 private func result(_ mode: RunMode, crossed: Bool = true, banked: Int = 100, lanes: Int = 5, streak: Int = 3,
-                    roost: Int = 50, kernels: Int = 0, whistles: Int = 0, hits: Int = 0) -> RunResult {
+                    roost: Int = 50, kernels: Int = 0, bells: Int = 0, hits: Int = 0) -> RunResult {
     RunResult(mode: mode, crossed: crossed, banked: banked, lanesCrossed: lanes, bestStreak: streak, bestRoost: roost,
-              eggsBanked: lanes, kernels: kernels, kernelCoins: kernels, whistles: whistles, hits: hits, roosts: 2,
+              eggsBanked: lanes, kernels: kernels, kernelCoins: kernels, bells: bells, hits: hits, roosts: 2,
               forcedHops: 0, duration: 30)
 }
 
@@ -19,7 +19,7 @@ struct ProfileStoreTests {
         #expect(store.hen.id == Hen.starter)
         #expect(store.profile.isUnlocked(crossing: 0))
         #expect(!store.profile.isUnlocked(crossing: 1))
-        #expect(!store.profile.nightRunUnlocked)
+        #expect(!store.profile.longRoadUnlocked)
     }
 
     @Test func buyingUpgradeSpendsCoinsAndLevelsUp() throws {
@@ -105,23 +105,23 @@ struct ProfileStoreTests {
         #expect(r.coinsEarned == 20 + 4 + 25)
     }
 
-    @Test func nightRunAndDailyBests() {
+    @Test func longRoadAndDailyBests() {
         let store = ProfileStore(storage: .inMemory())
-        store.record(result(.nightRun, crossed: false, banked: 400, lanes: 64))
-        #expect(store.profile.bestNightScore == 400)
-        #expect(store.profile.bestNightLanes == 64)
-        #expect(store.profile.has(.nightOwl))
+        store.record(result(.longRoad, crossed: false, banked: 400, lanes: 64))
+        #expect(store.profile.bestLongRoadScore == 400)
+        #expect(store.profile.bestLongRoadLanes == 64)
+        #expect(store.profile.has(.longHauler))
         let reward = store.record(result(.daily("2026-11-17"), banked: 300))
         #expect(reward.isNewBest)
         #expect(store.profile.dailyBest["2026-11-17"] == 300)
-        #expect(store.profile.has(.dailyCommuter))
+        #expect(store.profile.has(.dailyChores))
     }
 
-    @Test func districtAchievementAndNightRunUnlock() {
+    @Test func districtAchievementAndLongRoadUnlock() {
         let store = ProfileStore(storage: .inMemory())
         for i in 0..<CrossingSpec.perDistrict { store.record(result(.crossing(i))) }
-        #expect(store.profile.has(.sleepyLane))
-        #expect(store.profile.nightRunUnlocked)
+        #expect(store.profile.has(.meadowLane))
+        #expect(store.profile.longRoadUnlocked)
     }
 
     @Test func notAScratchNeedsLaterDistrict() {
@@ -134,7 +134,7 @@ struct ProfileStoreTests {
 
     @Test func historyIsTrimmed() {
         let store = ProfileStore(storage: .inMemory())
-        for _ in 0..<(PlayerProfile.historyLimit + 5) { store.record(result(.nightRun, crossed: false)) }
+        for _ in 0..<(PlayerProfile.historyLimit + 5) { store.record(result(.longRoad, crossed: false)) }
         #expect(store.profile.history.count == PlayerProfile.historyLimit)
         #expect(store.profile.stats.runs == PlayerProfile.historyLimit + 5)
     }
@@ -204,10 +204,10 @@ struct CatalogTests {
     }
 
     @Test func hazardsArriveOneDistrictAtATime() {
-        #expect(CrossingSpec.all[6].hazards.cornTrucks && !CrossingSpec.all[6].hazards.manholes)
-        #expect(CrossingSpec.all[12].hazards.manholes && !CrossingSpec.all[12].hazards.hotAsphalt)
-        #expect(CrossingSpec.all[18].hazards.hotAsphalt && !CrossingSpec.all[18].hazards.blackout)
-        #expect(CrossingSpec.all[24].hazards.blackout)
+        #expect(CrossingSpec.all[6].hazards.cornTrucks && !CrossingSpec.all[6].hazards.sprinklers)
+        #expect(CrossingSpec.all[12].hazards.sprinklers && !CrossingSpec.all[12].hazards.hotGravel)
+        #expect(CrossingSpec.all[18].hazards.hotGravel && !CrossingSpec.all[18].hazards.fog)
+        #expect(CrossingSpec.all[24].hazards.fog)
     }
 
     @Test func starsNeedRisk() {
@@ -227,9 +227,9 @@ struct CatalogTests {
     }
 
     @Test func generatedArtExists() {
-        var names = ["logo_wordmark", "corner_backdrop", "coin", "egg", "feather", "kernel", "grain_token", "manhole", "flare",
-                     "car_sedan", "car_taxi", "car_van", "car_bus", "car_cornTruck", "plaque", "billboard_backdrop",
-                     "vending_backdrop", "henhouse_backdrop", "timetable_backdrop", "camera_frame"]
+        var names = ["logo_wordmark", "corner_backdrop", "coin", "egg", "feather", "kernel", "grain_token", "sprinkler", "sprinkler_gurgle", "spray",
+                     "car_pickup", "car_tractor", "car_milkVan", "car_combine", "car_cornTruck", "plaque", "billboard_backdrop",
+                     "vending_backdrop", "henhouse_backdrop", "timetable_backdrop", "photo_frame", "ribbon_0", "ribbon_off"]
         names += Hen.all.map(\.art)
         names += UpgradeKind.allCases.map(\.art)
         names += District.all.map(\.art)

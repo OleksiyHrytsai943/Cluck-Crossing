@@ -64,9 +64,9 @@ final class CluckCrossingUITests: XCTestCase {
 
     func testLockedModesExplainThemselves() {
         launch()
-        waitFor("corner.nightRun").tap()
+        waitFor("corner.longRoad").tap()
         let toast = waitFor("toast")
-        XCTAssertTrue(toast.label.hasPrefix("Clear all of Sleepy Lane"))
+        XCTAssertTrue(toast.label.hasPrefix("Clear all of Meadow Lane"))
         XCTAssertFalse(element("game.screen").exists)
     }
 
@@ -108,8 +108,8 @@ final class CluckCrossingUITests: XCTestCase {
 
     // MARK: Top Players
 
-    func testTopPlayersShowsRosterAndClaimsLampReward() {
-        launch(["--coins=100", "--lamps=3"])
+    func testTopPlayersShowsRosterAndClaimsSunflowerReward() {
+        launch(["--coins=100", "--sunflowers=3"])
         waitFor("corner.shift").tap()
         waitFor("roster.screen")
         XCTAssertTrue(element("roster.web").exists)
@@ -206,7 +206,7 @@ final class CluckCrossingUITests: XCTestCase {
     // MARK: Screenshot tour (attachments used for the site)
 
     func testTour() {
-        launch(["--cleared=9", "--coins=4200", "--autopilot", "--lamps=4"])
+        launch(["--cleared=9", "--coins=4200", "--autopilot", "--sunflowers=4"])
         shot("01-corner", wait: "corner.screen")
         element("sign.timetable").tap(); shot("02-timetable", wait: "timetable.screen"); back()
         element("sign.vending").tap(); shot("03-vending", wait: "vending.screen"); back()

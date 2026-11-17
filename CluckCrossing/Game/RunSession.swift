@@ -13,10 +13,10 @@ struct RunSnapshot: Equatable {
     var heat = 0.0
     var heatActive = false
     var canRoost = false
-    var canWhistle = false
+    var canRing = false
     var onSafeRow = true
     var lanesCrossed = 0
-    /// 0…1 for fixed roads, nil in the Night Run.
+    /// 0…1 for fixed roads, nil in the Long Road.
     var progress: Double?
     var isInvulnerable = false
 }
@@ -24,11 +24,11 @@ struct RunSnapshot: Equatable {
 /// The full rules of one run, free of SpriteKit/SwiftUI so it can be unit-tested.
 ///
 /// Signature mechanics:
-/// 1. Clutch Climb & Roost – every new lane lays an egg worth more the longer the streak; only Roosting on an island banks it.
-/// 2. Manhole Flares – lids glow, then flare.
-/// 3. Crossing Guard Whistle – grain fills it; it freezes this lane and the next two, which then rush at 1.6×.
+/// 1. Clutch Climb & Roost – every new lane lays an egg worth more the longer the streak; only Roosting on a hay strip banks it.
+/// 2. Sprinkler Bursts – sprinklers gurgle, then shoot a jet of water.
+/// 3. Farm Bell – grain fills it; it freezes this lane and the next two, which then rush at 1.6×.
 /// 4. Corn Truck Spill – a horn telegraphs a long truck that drops kernels (grain, coins, cool feet).
-/// 5. Hot Asphalt – standing on a hot lane heats the feet; at full heat the hen hops forward on her own.
+/// 5. Hot Gravel – standing on a hot lane heats the feet; at full heat the hen hops forward on her own.
 final class RunSession {
     let config: RunConfig
     private(set) var rows: [RowKind] = []
@@ -57,7 +57,7 @@ final class RunSession {
     private(set) var bestStreak = 0
     private(set) var kernels = 0
     private(set) var kernelCoins = 0
-    private(set) var whistles = 0
+    private(set) var bells = 0
     private(set) var hits = 0
     private(set) var roosts = 0
     private(set) var bestRoost = 0
@@ -114,7 +114,7 @@ final class RunSession {
     }
 
     var canRoost: Bool { kind.isSafe && clutch > 0 && isRunning }
-    var canWhistle: Bool { grain >= 1 && isRunning }
+    var canRing: Bool { grain >= 1 && isRunning }
     var isInvulnerable: Bool { time < invulnerableUntil }
     var heatActive: Bool { lanes[row]?.isHot == true && config.heatRate > 0 }
 
@@ -131,7 +131,7 @@ final class RunSession {
             heat: heat,
             heatActive: heatActive,
             canRoost: canRoost,
-            canWhistle: canWhistle,
+            canRing: canRing,
             onSafeRow: kind.isSafe,
             lanesCrossed: lanesCrossed,
             progress: finishRow.map { Double(furthestRow) / Double(max(1, $0)) },
@@ -160,7 +160,7 @@ final class RunSession {
             if honked { events.append(.honk(row: r)) }
         }
 
-        // Hot Asphalt.
+        // Hot Gravel.
         if heatActive {
             heat += config.heatRate * dt
             if heat >= 1 {
@@ -187,7 +187,7 @@ final class RunSession {
         case .left: return move(rowDelta: 0, columnDelta: -1, forced: false)
         case .right: return move(rowDelta: 0, columnDelta: 1, forced: false)
         case .roost: return roost()
-        case .whistle: return whistle()
+        case .bell: return bell()
         }
     }
 
@@ -259,19 +259,19 @@ final class RunSession {
     }
 
     @discardableResult
-    func whistle() -> Bool {
-        guard canWhistle else { return false }
+    func bell() -> Bool {
+        guard canRing else { return false }
         grain = 0
-        whistles += 1
+        bells += 1
         var frozen: [Int] = []
         for r in row...(row + 2) {
             guard var lane = lanes[r] else { continue }
-            lane.frozenUntil = time + config.whistleDuration
+            lane.frozenUntil = time + config.bellDuration
             lane.rushUntil = lane.frozenUntil + config.rushDuration
             lanes[r] = lane
             frozen.append(r)
         }
-        events.append(.whistle(rows: frozen))
+        events.append(.bell(rows: frozen))
         return true
     }
 
@@ -285,8 +285,8 @@ final class RunSession {
         let right = Double(column) + 0.5 + Self.henHalfWidth
         if let car = lane.cars.first(where: { $0.x < right && $0.x + $0.length > left }) {
             hit(.car(car.kind))
-        } else if let manhole = lane.manhole, manhole.column == column, manhole.phase(at: time) == .flare {
-            hit(.flare)
+        } else if let sprinkler = lane.sprinkler, sprinkler.column == column, sprinkler.phase(at: time) == .spray {
+            hit(.spray)
         }
     }
 
@@ -304,7 +304,7 @@ final class RunSession {
             events.append(.outOfFeathers)
             return
         }
-        // Back to the last island; the lanes since then can be scored again.
+        // Back to the last hay strip; the lanes since then can be scored again.
         row = lastSafeRow
         column = RunConfig.columns / 2
         scoredRow = lastSafeRow
@@ -333,7 +333,7 @@ final class RunSession {
             for car in lane.cars where car.x + dx < right && car.x + dx + car.length > left {
                 return false
             }
-            if let manhole = lane.manhole, manhole.column == c, manhole.phase(at: at) != .idle {
+            if let sprinkler = lane.sprinkler, sprinkler.column == c, sprinkler.phase(at: at) != .idle {
                 return false
             }
             t += 0.05
@@ -352,7 +352,7 @@ final class RunSession {
         if kind.isSafe, clutch > 0, streak >= 3 || kind(of: row + 1).isSafe { return .roost }
         let forwardSafe = isSafe(row: row + 1, column: column, within: 0.6)
         if forwardSafe { return .forward }
-        if canWhistle, kind(of: row + 1) == .lane { return .whistle }
+        if canRing, kind(of: row + 1) == .lane { return .bell }
         let hereSafe = isSafe(row: row, column: column, within: 0.4)
         let sideOrder: [PilotAction] = column >= RunConfig.columns / 2 ? [.left, .right] : [.right, .left]
         for side in sideOrder {
@@ -382,7 +382,7 @@ final class RunSession {
             eggsBanked: eggsBanked,
             kernels: kernels,
             kernelCoins: kernelCoins,
-            whistles: whistles,
+            bells: bells,
             hits: hits,
             roosts: roosts,
             forcedHops: forcedHops,

@@ -5,7 +5,7 @@ struct LifetimeStats: Equatable, Codable {
     var lanes = 0
     var eggsBanked = 0
     var kernels = 0
-    var whistles = 0
+    var bells = 0
     var bumps = 0
     var roosts = 0
     var bestStreak = 0
@@ -37,20 +37,20 @@ struct PlayerProfile: Equatable, Codable {
     /// Best stars per crossing (index = crossing id).
     var stars: [Int] = Array(repeating: 0, count: CrossingSpec.count)
     var bestScores: [Int] = Array(repeating: 0, count: CrossingSpec.count)
-    var bestNightLanes = 0
-    var bestNightScore = 0
+    var bestLongRoadLanes = 0
+    var bestLongRoadScore = 0
     var dailyBest: [String: Int] = [:]
     var stats = LifetimeStats()
     var achievements: [String] = []
     var history: [RunRecord] = []
     var tutorialSeen = false
     var districtIntrosSeen: [Int] = []
-    /// Night Shift: best banked score per ISO week.
+    /// Farm Week: best banked score per ISO week.
     var weeklyBest: [String: Int] = [:]
-    /// Lamp Lighter: UTC day keys with a run, per ISO week.
-    var lampNights: [String: [String]] = [:]
-    /// Claimed Lamp Lighter tiers ("2026-W47#3").
-    var claimedLamps: [String] = []
+    /// Sunflower Row: UTC day keys with a run, per ISO week.
+    var sunflowerNights: [String: [String]] = [:]
+    /// Claimed Sunflower Row tiers ("2026-W47#3").
+    var claimedSunflowers: [String] = []
 
     func level(of upgrade: UpgradeKind) -> Int { upgrades[upgrade.rawValue] ?? 0 }
 
@@ -69,10 +69,10 @@ struct PlayerProfile: Equatable, Codable {
         stars.firstIndex(of: 0) ?? CrossingSpec.count - 1
     }
 
-    /// Night Run and Daily open after Sleepy Lane is cleared.
-    var nightRunUnlocked: Bool { stars.prefix(CrossingSpec.perDistrict).allSatisfy { $0 > 0 } }
+    /// Long Road and Daily open after Sleepy Lane is cleared.
+    var longRoadUnlocked: Bool { stars.prefix(CrossingSpec.perDistrict).allSatisfy { $0 > 0 } }
 
     func has(_ achievement: Achievement) -> Bool { achievements.contains(achievement.rawValue) }
 
-    func lampsLit(week: String) -> Int { min(LampLighter.lampsPerWeek, lampNights[week]?.count ?? 0) }
+    func sunflowersLit(week: String) -> Int { min(SunflowerRow.sunflowersPerWeek, sunflowerNights[week]?.count ?? 0) }
 }

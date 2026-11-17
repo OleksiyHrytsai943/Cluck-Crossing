@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Crossing select as a night bus-stop departure board: amber split-flap rows grouped by district.
+/// Crossing select as a chalk route board by the farm mailbox, grouped by district.
 struct TimetableView: View {
     @ObservedObject var store: ProfileStore
     @ObservedObject var router: AppRouter
@@ -8,7 +8,7 @@ struct TimetableView: View {
 
     var body: some View {
         VStack(spacing: 10) {
-            StreetHeader(title: "TIMETABLE", color: Theme.led, coins: store.coins, onBack: router.back)
+            FarmHeader(title: "ROUTE BOARD", color: Theme.wheat, coins: store.coins, onBack: router.back)
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack(spacing: 14, pinnedViews: []) {
@@ -45,16 +45,16 @@ struct TimetableView: View {
                 HStack(alignment: .lastTextBaseline) {
                     VStack(alignment: .leading, spacing: 0) {
                         Text("ROUTE \(district.id + 1)")
-                            .font(Theme.led(12))
-                            .foregroundColor(Theme.led)
+                            .font(Theme.chalkFont(12))
+                            .foregroundColor(Theme.chalk)
                         Text(district.name.uppercased())
                             .font(Theme.display(24))
                             .foregroundColor(.white)
                     }
                     Spacer()
                     Text("\(cleared)/\(specs.count)")
-                        .font(Theme.led(15))
-                        .foregroundColor(Theme.led)
+                        .font(Theme.chalkFont(15))
+                        .foregroundColor(Theme.chalk)
                 }
                 .padding(.horizontal, 12)
                 .padding(.bottom, 6)
@@ -73,7 +73,7 @@ struct TimetableView: View {
         }
         .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Theme.panel.opacity(0.96)))
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Theme.led.opacity(0.5), lineWidth: 1.5))
+        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Theme.chalk.opacity(0.5), lineWidth: 1.5))
     }
 
     private var columnHeader: some View {
@@ -84,8 +84,8 @@ struct TimetableView: View {
             Text("LANES").frame(width: 50)
             Text("STATUS").frame(width: 70, alignment: .trailing)
         }
-        .font(Theme.led(11))
-        .foregroundColor(Theme.led.opacity(0.7))
+        .font(Theme.chalkFont(11))
+        .foregroundColor(Theme.chalk.opacity(0.7))
         .padding(.horizontal, 12)
         .padding(.bottom, 4)
         .accessibilityHidden(true)
@@ -131,7 +131,7 @@ struct TimetableView: View {
             }
             .padding(.horizontal, 12)
             .frame(minHeight: 54)
-            .background(spec.id == store.profile.nextCrossing ? Theme.led.opacity(0.12) : Color.clear)
+            .background(spec.id == store.profile.nextCrossing ? Theme.chalk.opacity(0.12) : Color.clear)
             .overlay(Rectangle().fill(Color.white.opacity(0.06)).frame(height: 1), alignment: .top)
         }
         .buttonStyle(.plain)
@@ -140,20 +140,20 @@ struct TimetableView: View {
     }
 }
 
-/// Amber split-flap digits.
+/// Chalk numbers on a small slate.
 struct FlapText: View {
     let text: String
     var width: CGFloat
 
     var body: some View {
         Text(text)
-            .font(Theme.led(16))
-            .foregroundColor(Theme.led)
+            .font(Theme.chalkFont(16))
+            .foregroundColor(Theme.chalk)
             .frame(width: width, height: 30)
             .background(
                 RoundedRectangle(cornerRadius: 5)
-                    .fill(Color.black)
-                    .overlay(Rectangle().fill(Color.white.opacity(0.08)).frame(height: 1))
+                    .fill(Theme.chalkboard)
+                    .overlay(RoundedRectangle(cornerRadius: 5).stroke(Color(red: 0.55, green: 0.38, blue: 0.2), lineWidth: 2))
             )
     }
 }
@@ -166,7 +166,7 @@ struct DistrictCardView: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.7).ignoresSafeArea()
+            Theme.soil.opacity(0.6).ignoresSafeArea()
                 .onTapGesture(perform: onClose)
             VStack(spacing: 14) {
                 Image(intro.district.art)
@@ -174,9 +174,9 @@ struct DistrictCardView: View {
                     .scaledToFit()
                     .clipShape(RoundedRectangle(cornerRadius: 14))
                 Text("NOW ENTERING")
-                    .font(Theme.led(13))
-                    .foregroundColor(Theme.led)
-                NeonText(text: intro.district.name.uppercased(), size: 32, color: Theme.neonPink)
+                    .font(Theme.chalkFont(13))
+                    .foregroundColor(Theme.chalk)
+                PaintedText(text: intro.district.name.uppercased(), size: 32, color: Theme.barnRed)
                     .multilineTextAlignment(.center)
                 Text(intro.district.newHazard)
                     .font(Theme.body(16))
@@ -184,7 +184,7 @@ struct DistrictCardView: View {
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                 Button("Cross \(CrossingSpec.all[intro.crossing].title)", action: onStart)
-                    .buttonStyle(NeonPillButtonStyle(color: Theme.neonTeal, filled: true))
+                    .buttonStyle(FarmButtonStyle(color: Theme.meadow, filled: true))
                     .accessibilityIdentifier(AccessibilityID.districtStart)
                 Button("Not now", action: onClose)
                     .font(Theme.headline(16))
@@ -193,7 +193,7 @@ struct DistrictCardView: View {
             }
             .padding(20)
             .background(RoundedRectangle(cornerRadius: 26, style: .continuous).fill(Theme.panel))
-            .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(Theme.neonPink, lineWidth: 2))
+            .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(Theme.barnRed, lineWidth: 2))
             .padding(22)
             .frame(maxWidth: Theme.maxContentWidth)
             .accessibilityElement(children: .contain)

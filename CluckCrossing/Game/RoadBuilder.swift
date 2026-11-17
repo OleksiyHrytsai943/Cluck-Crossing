@@ -1,7 +1,7 @@
 import Foundation
 
 /// Lays out rows and generates lane traffic. Fixed roads (crossings, daily) are built up front;
-/// the Night Run keeps appending segments with rising difficulty.
+/// the Long Road keeps appending segments with rising difficulty.
 struct RoadBuilder {
     enum Plan: Equatable {
         case fixed(sections: [Int], difficulty: Double, hazards: HazardSet)
@@ -24,17 +24,17 @@ struct RoadBuilder {
             return .fixed(sections: spec.sections, difficulty: spec.difficulty, hazards: spec.hazards)
         case .daily(let key):
             return .fixed(sections: DailyCrossing.sections(seed: DailyCrossing.seed(for: key)), difficulty: 0.62,
-                          hazards: HazardSet(cornTrucks: true, manholes: true, hotAsphalt: true, blackout: false))
-        case .nightRun:
+                          hazards: HazardSet(cornTrucks: true, sprinklers: true, hotGravel: true, fog: false))
+        case .longRoad:
             return .endless
         }
     }
 
-    /// Night Run ramps from gentle to expressway over ~150 rows and unlocks hazards on the way.
+    /// Long Road ramps from gentle to expressway over ~150 rows and unlocks hazards on the way.
     static func endlessDifficulty(row: Int) -> Double { min(1, 0.08 + Double(row) / 160) }
 
     static func endlessHazards(row: Int) -> HazardSet {
-        HazardSet(cornTrucks: row >= 14, manholes: row >= 28, hotAsphalt: row >= 45, blackout: false)
+        HazardSet(cornTrucks: row >= 14, sprinklers: row >= 28, hotGravel: row >= 45, fog: false)
     }
 
     /// Builds the whole fixed road, or the first stretch of an endless one.
@@ -85,12 +85,12 @@ struct RoadBuilder {
             baseSpeed: (1.0 + 2.5 * d) * rng.double(in: 0.85...1.15),
             minGap: minGap,
             maxGap: minGap + max(1.2, 3.4 - 1.6 * d),
-            busChance: d > 0.35 ? 0.1 + 0.2 * d : 0,
-            isHot: hazards.hotAsphalt,
+            combineChance: d > 0.35 ? 0.1 + 0.2 * d : 0,
+            isHot: hazards.hotGravel,
             rng: SeededGenerator(seed: rng.next())
         )
-        if hazards.manholes, rng.chance(0.4 + 0.25 * d) {
-            lane.manhole = Manhole(
+        if hazards.sprinklers, rng.chance(0.4 + 0.25 * d) {
+            lane.sprinkler = Sprinkler(
                 column: Int.random(in: 0..<RunConfig.columns, using: &rng),
                 idleTime: max(1.2, 3.0 - 1.4 * d) * rng.double(in: 0.9...1.2),
                 offset: rng.double(in: 0...5)
@@ -166,10 +166,10 @@ struct RoadBuilder {
         lane.spawnCountdown -= speed * dt
         if lane.spawnCountdown <= 0, !lane.truckHonking {
             let kind: CarKind
-            if lane.rng.chance(lane.busChance) {
-                kind = .bus
+            if lane.rng.chance(lane.combineChance) {
+                kind = .combine
             } else {
-                kind = [.sedan, .sedan, .taxi, .van].randomElement(using: &lane.rng) ?? .sedan
+                kind = [.pickup, .pickup, .tractor, .milkVan].randomElement(using: &lane.rng) ?? .pickup
             }
             nextID += 1
             let x = lane.direction > 0 ? -kind.length - 0.5 : Double(RunConfig.columns) + 0.5

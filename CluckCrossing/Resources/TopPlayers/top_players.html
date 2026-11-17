@@ -3,75 +3,75 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Night Shift Roster</title>
+<title>Farm Week Roster</title>
 <style>
   :root {
-    --night: #080d1c; --panel: #120e24; --pink: #ff5fd2; --teal: #2ee6d6;
-    --gold: #ffd54a; --sodium: #ffb347; --cream: #fff4dc; --muted: #bfc4d9;
+    --walnut: #4a2e1b; --wood: #a8743f; --barn: #c8372d; --meadow: #8cd15a; --wheat: #f6c744;
+    --cream: #fff6e0; --ink: #2b1a10; --chalk: #f3eedc; --board: #2e4a38; --muted: #e8d9bc;
   }
   * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
   html, body { margin: 0; background: transparent; color: #fff;
     font-family: "Avenir Next", -apple-system, sans-serif; -webkit-text-size-adjust: 100%; }
   .wrap { padding: 4px 2px 16px; }
-  .neon { font-family: "Avenir Next Condensed", "Avenir Next", sans-serif; font-weight: 800; letter-spacing: .5px;
-    text-shadow: 0 0 4px currentColor, 0 0 12px currentColor; }
-  .theme { border: 2px solid var(--sodium); border-radius: 18px; padding: 12px 14px; background: var(--panel);
-    box-shadow: 0 0 14px rgba(255,179,71,.35); margin-bottom: 14px; }
-  .theme .label { font: 700 12px Menlo, monospace; color: var(--sodium); }
-  .theme h2 { margin: 2px 0 4px; font-size: 22px; color: var(--sodium); }
+  .painted { font-family: "American Typewriter", Georgia, serif; font-weight: 700; letter-spacing: .3px;
+    text-shadow: 1.5px 1.5px 0 var(--ink), -1px -1px 0 var(--ink), 0 3px 4px rgba(43,26,16,.35); }
+  .chalk { font-family: "Chalkboard SE", "Marker Felt", sans-serif; font-weight: 700; }
+  .theme { border: 4px solid var(--ink); border-radius: 18px; padding: 12px 14px; background: var(--walnut);
+    box-shadow: 0 4px 0 rgba(43,26,16,.35); margin-bottom: 14px; }
+  .theme .label { font-size: 13px; color: var(--wheat); }
+  .theme h2 { margin: 2px 0 4px; font-size: 24px; color: var(--wheat); }
   .theme p { margin: 0; color: var(--cream); font-size: 15px; }
-  .preview { font: 700 11px Menlo, monospace; color: #111; background: var(--gold); border-radius: 8px;
-    padding: 6px 10px; margin-bottom: 12px; line-height: 1.35; }
-  h3 { margin: 18px 4px 8px; font-size: 20px; color: var(--teal); }
-  .board { background: #000; border: 6px solid #3a3a46; border-radius: 16px; padding: 6px 10px; }
-  .row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .preview { font-size: 12px; color: var(--ink); background: var(--cream); border: 3px dashed var(--barn); border-radius: 10px;
+    padding: 7px 10px; margin-bottom: 12px; line-height: 1.35; }
+  h3 { margin: 18px 4px 8px; font-size: 22px; color: var(--cream); }
+  .board { background: var(--board); border: 8px solid var(--wood); border-radius: 16px; padding: 6px 10px; box-shadow: 0 4px 0 rgba(43,26,16,.35); }
+  .row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px dashed rgba(243,238,220,.25); }
   .row:last-child { border-bottom: none; }
-  .rank { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
-    font: 800 17px Menlo, monospace; color: #111; background: var(--muted); flex: none; }
-  .r1 .rank { background: var(--gold); box-shadow: 0 0 10px var(--gold); }
-  .r2 .rank, .r3 .rank { background: var(--teal); }
+  .rank { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; flex: none;
+    font: 700 17px "Chalkboard SE", sans-serif; color: var(--ink); background: var(--muted); border: 2px solid var(--ink); }
+  .r1 .rank { background: var(--wheat); }
+  .r2 .rank, .r3 .rank { background: var(--meadow); }
   .hen { width: 38px; height: 38px; flex: none; }
-  .name { flex: 1; font-weight: 700; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .me .name { color: var(--pink); }
-  .score { font: 700 17px Menlo, monospace; color: #ffa028; }
-  .empty { color: var(--muted); padding: 14px 4px; font-size: 15px; }
+  .name { flex: 1; font: 700 16px "Chalkboard SE", sans-serif; color: var(--chalk); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .me .name { color: var(--wheat); }
+  .score { font: 700 17px "Chalkboard SE", sans-serif; color: var(--chalk); }
+  .empty { color: var(--chalk); padding: 14px 4px; font: 15px "Chalkboard SE", sans-serif; }
   .slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .slot { border: 2px solid var(--pink); border-radius: 14px; padding: 10px 6px; text-align: center; background: var(--panel);
-    box-shadow: 0 0 10px rgba(255,95,210,.35); }
-  .slot .ranks { font: 800 12px Menlo, monospace; color: var(--pink); }
-  .slot .title { font-weight: 800; font-size: 14px; margin: 4px 0; }
-  .slot .coins { font: 700 14px Menlo, monospace; color: var(--gold); }
+  .slot { border: 3px solid var(--ink); border-radius: 14px; padding: 10px 6px; text-align: center; background: var(--walnut); }
+  .slot .ranks { font: 700 13px "Chalkboard SE", sans-serif; color: var(--wheat); }
+  .slot .title { font-weight: 800; font-size: 14px; margin: 4px 0; color: var(--cream); }
+  .slot .coins { font: 700 14px "Chalkboard SE", sans-serif; color: var(--wheat); }
   .slot .state { font-size: 11px; color: var(--muted); margin-top: 4px; }
-  .lamps { display: flex; justify-content: space-between; padding: 10px 6px; background: var(--panel);
-    border-radius: 14px; border: 2px solid rgba(255,179,71,.6); }
-  .lamp { width: 30px; height: 44px; position: relative; }
-  .lamp .pole { position: absolute; left: 13px; top: 12px; width: 4px; height: 32px; background: #2b2d36; }
-  .lamp .bulb { position: absolute; left: 6px; top: 0; width: 18px; height: 14px; border-radius: 8px 8px 4px 4px; background: #3a3a46; }
-  .lamp.on .bulb { background: var(--sodium); box-shadow: 0 0 12px var(--sodium), 0 0 24px rgba(255,179,71,.6); }
-  .foot { color: var(--muted); font-size: 13px; margin: 8px 4px 0; line-height: 1.4; }
+  .flowers { display: flex; justify-content: space-between; padding: 10px 8px; background: var(--walnut);
+    border-radius: 14px; border: 3px solid var(--ink); }
+  .flower { width: 32px; height: 48px; position: relative; }
+  .flower .stem { position: absolute; left: 14px; top: 20px; width: 4px; height: 28px; background: #4e9a33; }
+  .flower .head { position: absolute; left: 3px; top: 0; width: 26px; height: 26px; border-radius: 50%; background: #6b5a48; border: 3px solid #8a7a66; }
+  .flower.on .head { background: #6b3e1e; border: 6px solid #ffc83d; }
+  .foot { color: var(--cream); font-size: 13px; margin: 8px 4px 0; line-height: 1.4; text-shadow: 0 1px 2px rgba(43,26,16,.7); }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="theme">
-    <div class="label" id="week">THIS WEEK</div>
-    <h2 class="neon" id="themeTitle">Night Shift</h2>
+    <div class="label chalk" id="week">THIS WEEK</div>
+    <h2 class="painted" id="themeTitle">Farm Week</h2>
     <p id="themeDetail"></p>
   </div>
-  <div class="preview" id="notice" hidden></div>
+  <div class="preview chalk" id="notice" hidden></div>
 
-  <h3 class="neon">TOP 5 THIS WEEK</h3>
+  <h3 class="painted">TOP 5 THIS WEEK</h3>
   <div class="board" id="board"><div class="empty">Loading the roster…</div></div>
 
-  <h3 class="neon">WEEKLY REWARDS</h3>
+  <h3 class="painted">WEEKLY REWARDS</h3>
   <div class="slots" id="slots"></div>
 
-  <h3 class="neon">LAMP LIGHTER</h3>
-  <div class="lamps" id="lamps"></div>
-  <p class="foot" id="lampText"></p>
+  <h3 class="painted">SUNFLOWER ROW</h3>
+  <div class="flowers" id="flowers"></div>
+  <p class="foot" id="flowerText"></p>
 </div>
 <script>
-  // The app replaces the placeholder below with the LeaderboardPage JSON (see RosterWebView).
+  // The app replaces the placeholders below with the LeaderboardPage JSON and hen portraits (see RosterWebView).
   const ROSTER_DATA = /*ROSTER_DATA*/null;
   const HEN_IMAGES = /*HEN_IMAGES*/{};
   function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -100,13 +100,13 @@
       '</div><div class="coins">' + r.coins + ' coins</div><div class="state">' +
       (data.isPreview ? 'Opens with the live roster' : 'Paid on Monday') + '</div></div>').join('');
 
-    let lamps = '';
-    for (let i = 0; i < data.lampsPerWeek; i++) {
-      lamps += '<div class="lamp' + (i < data.lampsLit ? ' on' : '') + '"><div class="bulb"></div><div class="pole"></div></div>';
+    let flowers = '';
+    for (let i = 0; i < data.sunflowersPerWeek; i++) {
+      flowers += '<div class="flower' + (i < data.sunflowersLit ? ' on' : '') + '"><div class="stem"></div><div class="head"></div></div>';
     }
-    document.getElementById('lamps').innerHTML = lamps;
-    document.getElementById('lampText').textContent =
-      data.lampsLit + ' of ' + data.lampsPerWeek + ' lamps lit. Every night you play lights one more lamp on your block.';
+    document.getElementById('flowers').innerHTML = flowers;
+    document.getElementById('flowerText').textContent =
+      data.sunflowersLit + ' of ' + data.sunflowersPerWeek + ' sunflowers in bloom. Every day you play, one more opens along the fence.';
   }
   if (ROSTER_DATA) { renderBoard(ROSTER_DATA); }
 </script>

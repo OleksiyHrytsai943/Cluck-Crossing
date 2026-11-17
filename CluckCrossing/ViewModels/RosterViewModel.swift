@@ -1,7 +1,7 @@
 import Combine
 import Foundation
 
-/// Top Players: loads the weekly roster page from a `LeaderboardProviding` and handles Lamp Lighter claims.
+/// Top Players: loads the weekly roster page from a `LeaderboardProviding` and handles Sunflower Row claims.
 @MainActor
 final class RosterViewModel: ObservableObject {
     let store: ProfileStore
@@ -19,13 +19,13 @@ final class RosterViewModel: ObservableObject {
         self.sound = sound
     }
 
-    var shift: NightShift { store.shift }
-    var lampsLit: Int { store.lampsLitThisWeek }
+    var shift: FarmWeek { store.shift }
+    var sunflowersLit: Int { store.sunflowersLitThisWeek }
 
     func load() async {
         let standing = PlayerStanding(name: "You · \(store.hen.name)", hen: store.hen.art, weeklyBest: store.weeklyBest)
         do {
-            page = try await provider.weeklyTop(for: shift, player: standing, lampsLit: lampsLit, now: store.currentDate)
+            page = try await provider.weeklyTop(for: shift, player: standing, sunflowersLit: sunflowersLit, now: store.currentDate)
             loadError = nil
         } catch {
             loadError = "The roster could not load. \(error.localizedDescription)"
@@ -38,13 +38,13 @@ final class RosterViewModel: ObservableObject {
         return String(data: data, encoding: .utf8)
     }
 
-    func claim(_ tier: LampLighter.Tier) async -> String {
+    func claim(_ tier: SunflowerRow.Tier) async -> String {
         do {
-            try store.claimLamps(tier)
+            try store.claimSunflowers(tier)
             haptics.play(.buy)
             sound.play(.buy)
             await load()
-            return "+\(tier.coins) coins from the Lamp Lighter!"
+            return "+\(tier.coins) coins from the Sunflower Row!"
         } catch {
             haptics.play(.denied)
             return error.localizedDescription

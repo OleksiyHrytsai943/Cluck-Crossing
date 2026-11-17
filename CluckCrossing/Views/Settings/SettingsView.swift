@@ -22,7 +22,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Controls")
                 } footer: {
-                    Text("Swaps the WHISTLE and ROOST buttons during a run.")
+                    Text("Swaps the BELL and ROOST buttons during a run.")
                 }
                 Section("Help") {
                     Button("Replay the tutorial", action: onReplayTutorial)
@@ -51,7 +51,7 @@ struct SettingsView: View {
             }
         }
         .navigationViewStyle(.stack)
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.settingsScreen)
     }

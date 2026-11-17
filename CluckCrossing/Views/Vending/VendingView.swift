@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Upgrades as a glowing all-night vending machine: products sit on coils behind glass,
-/// the side panel shows the selected product, its LED level dots and the BUY key.
+/// Upgrades in a country Feed Store: goods sit on wooden shelves,
+/// the counter shows the selected item, its level pegs and the BUY key.
 struct VendingView: View {
     @StateObject private var viewModel: VendingViewModel
     @ObservedObject private var store: ProfileStore
@@ -16,7 +16,7 @@ struct VendingView: View {
 
     var body: some View {
         VStack(spacing: 10) {
-            StreetHeader(title: "VENDING", color: Theme.neonPink, coins: store.coins, onBack: router.back)
+            FarmHeader(title: "FEED STORE", color: Theme.wheat, coins: store.coins, onBack: router.back)
             ScrollView {
                 VStack(spacing: 0) {
                     machineTop
@@ -24,9 +24,9 @@ struct VendingView: View {
                     controlPanel
                     tray
                 }
-                .background(RoundedRectangle(cornerRadius: 26, style: .continuous).fill(Color(red: 0.62, green: 0.08, blue: 0.2)))
+                .background(RoundedRectangle(cornerRadius: 26, style: .continuous).fill(Theme.barnRed))
                 .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(Theme.ink, lineWidth: 3))
-                .shadow(color: Theme.neonPink.opacity(0.5), radius: 20)
+                .shadow(color: Theme.ink.opacity(0.3), radius: 2, x: 0, y: 2)
                 .padding(.horizontal, 16)
                 .padding(.bottom, 24)
             }
@@ -40,11 +40,11 @@ struct VendingView: View {
 
     private var machineTop: some View {
         HStack {
-            NeonText(text: "SNACKS & GEAR", size: 22, color: Theme.eggGold)
+            PaintedText(text: "FEED & SUPPLY", size: 22, color: Theme.wheat)
             Spacer()
-            Text("24/7")
-                .font(Theme.led(14))
-                .foregroundColor(Theme.neonTeal)
+            Text("EST. 1952")
+                .font(Theme.chalkFont(14))
+                .foregroundColor(Theme.meadow)
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 10)
@@ -59,7 +59,7 @@ struct VendingView: View {
         .padding(10)
         .background(
             RoundedRectangle(cornerRadius: 14)
-                .fill(LinearGradient(colors: [Color(red: 0.1, green: 0.12, blue: 0.2), Color(red: 0.05, green: 0.06, blue: 0.12)], startPoint: .top, endPoint: .bottom))
+                .fill(LinearGradient(colors: [Color(red: 0.42, green: 0.28, blue: 0.16), Color(red: 0.30, green: 0.19, blue: 0.10)], startPoint: .top, endPoint: .bottom))
         )
         .overlay(
             // Glass sheen.
@@ -101,25 +101,25 @@ struct VendingView: View {
                 Spacer(minLength: 4)
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(kind.slot)
-                        .font(Theme.led(13))
-                        .foregroundColor(Theme.neonTeal)
+                        .font(Theme.chalkFont(13))
+                        .foregroundColor(Theme.meadow)
                     if let price = kind.price(forLevel: level) {
                         HStack(spacing: 3) {
                             Image("coin").resizable().frame(width: 14, height: 14)
                             Text(Formatters.number(price))
-                                .font(Theme.led(13))
-                                .foregroundColor(Theme.eggGold)
+                                .font(Theme.chalkFont(13))
+                                .foregroundColor(Theme.wheat)
                         }
                     } else {
                         Text("SOLD OUT")
-                            .font(Theme.led(11))
-                            .foregroundColor(Theme.neonRed)
+                            .font(Theme.chalkFont(11))
+                            .foregroundColor(Theme.tomato)
                     }
                 }
             }
             .padding(8)
-            .background(RoundedRectangle(cornerRadius: 10).fill(selected ? Theme.neonTeal.opacity(0.16) : Color.white.opacity(0.03)))
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(selected ? Theme.neonTeal : Color.clear, lineWidth: 2))
+            .background(RoundedRectangle(cornerRadius: 10).fill(selected ? Theme.meadow.opacity(0.16) : Color.white.opacity(0.03)))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(selected ? Theme.meadow : Color.clear, lineWidth: 2))
         }
         .buttonStyle(.plain)
         .accessibilityLabel("\(kind.title), level \(level) of \(kind.maxLevel)")
@@ -132,8 +132,8 @@ struct VendingView: View {
         return HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(kind.slot) · \(kind.title.uppercased())")
-                    .font(Theme.led(13))
-                    .foregroundColor(Theme.neonTeal)
+                    .font(Theme.chalkFont(13))
+                    .foregroundColor(Theme.meadow)
                 Text(kind.detail)
                     .font(Theme.body(14))
                     .foregroundColor(.white)
@@ -141,7 +141,7 @@ struct VendingView: View {
             }
             .padding(10)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(RoundedRectangle(cornerRadius: 10).fill(Color.black))
+            .background(RoundedRectangle(cornerRadius: 10).fill(Theme.chalkboard))
             Button {
                 router.show(toast: viewModel.buy(kind))
             } label: {
@@ -150,12 +150,12 @@ struct VendingView: View {
                         .font(Theme.display(22))
                     if let price {
                         Text(Formatters.number(price))
-                            .font(Theme.led(12))
+                            .font(Theme.chalkFont(12))
                     }
                 }
                 .foregroundColor(Theme.ink)
                 .frame(width: 78, height: 70)
-                .background(RoundedRectangle(cornerRadius: 14).fill(price == nil ? Color.gray : Theme.eggGold))
+                .background(RoundedRectangle(cornerRadius: 14).fill(price == nil ? Color.gray : Theme.wheat))
                 .overlay(RoundedRectangle(cornerRadius: 14).stroke(Theme.ink, lineWidth: 2))
             }
             .buttonStyle(WalkSignalButtonStyle())
@@ -168,16 +168,16 @@ struct VendingView: View {
 
     private var tray: some View {
         RoundedRectangle(cornerRadius: 10)
-            .fill(Color.black.opacity(0.85))
+            .fill(Theme.chalkboard)
             .frame(height: 34)
-            .overlay(Text("PUSH").font(Theme.led(12)).foregroundColor(.gray))
+            .overlay(Text("THANK YOU, COME AGAIN").font(Theme.chalkFont(11)).foregroundColor(Theme.chalk))
             .padding(.horizontal, 60)
             .padding(.bottom, 14)
             .accessibilityHidden(true)
     }
 }
 
-/// LED dots for an upgrade level.
+/// Wooden pegs for an upgrade level.
 struct LevelDots: View {
     let level: Int
     let max: Int
@@ -186,9 +186,9 @@ struct LevelDots: View {
         HStack(spacing: 5) {
             ForEach(0..<max, id: \.self) { i in
                 Circle()
-                    .fill(i < level ? Theme.neonTeal : Color.white.opacity(0.15))
+                    .fill(i < level ? Theme.meadow : Color.white.opacity(0.15))
                     .frame(width: 10, height: 10)
-                    .shadow(color: i < level ? Theme.neonTeal : .clear, radius: 4)
+                    .shadow(color: Theme.ink.opacity(0.3), radius: 2, x: 0, y: 2)
             }
         }
     }

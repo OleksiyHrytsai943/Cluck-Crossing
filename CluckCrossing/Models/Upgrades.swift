@@ -1,9 +1,9 @@
 import Foundation
 
-/// Items in the Vending Machine. Each level makes one mechanic stronger.
+/// Items in the Feed Store. Each level makes one mechanic stronger.
 enum UpgradeKind: String, CaseIterable, Identifiable, Codable {
     case coolFeet
-    case longWhistle
+    case bigBell
     case bigBasket
     case spareFeather
     case cornPouch
@@ -12,19 +12,19 @@ enum UpgradeKind: String, CaseIterable, Identifiable, Codable {
 
     var title: String {
         switch self {
-        case .coolFeet: "Cool Feet Gel"
-        case .longWhistle: "Brass Whistle"
+        case .coolFeet: "Mud Socks"
+        case .bigBell: "Big Brass Bell"
         case .bigBasket: "Wicker Basket"
         case .spareFeather: "Spare Feather"
-        case .cornPouch: "Corn Pouch"
+        case .cornPouch: "Feed Sack"
         }
     }
 
     var detail: String {
         switch self {
-        case .coolFeet: "Feet heat 12% slower per level on hot asphalt."
-        case .longWhistle: "Whistle freezes traffic 0.5 s longer per level."
-        case .bigBasket: "Every lane adds 6% more to your clutch per level."
+        case .coolFeet: "Feet heat 12% slower per level on hot gravel."
+        case .bigBell: "The farm bell holds traffic 0.5 s longer per level."
+        case .bigBasket: "Every lane adds 6% more to your basket per level."
         case .spareFeather: "Start each run with one more feather per level."
         case .cornPouch: "Each corn kernel pays +1 coin per level."
         }
@@ -34,7 +34,7 @@ enum UpgradeKind: String, CaseIterable, Identifiable, Codable {
 
     var maxLevel: Int {
         switch self {
-        case .coolFeet, .longWhistle: 4
+        case .coolFeet, .bigBell: 4
         case .bigBasket: 5
         case .spareFeather: 2
         case .cornPouch: 3
@@ -44,7 +44,7 @@ enum UpgradeKind: String, CaseIterable, Identifiable, Codable {
     private var basePrice: Double {
         switch self {
         case .coolFeet: 180
-        case .longWhistle: 220
+        case .bigBell: 220
         case .bigBasket: 160
         case .spareFeather: 900
         case .cornPouch: 200
@@ -58,7 +58,7 @@ enum UpgradeKind: String, CaseIterable, Identifiable, Codable {
         return Int((raw / 10).rounded()) * 10
     }
 
-    /// Slot label on the machine (A1, A2 …).
+    /// Shelf label in the Feed Store (A1, A2 …).
     var slot: String {
         ["A1", "A2", "B1", "B2", "C1"][Self.allCases.firstIndex(of: self) ?? 0]
     }

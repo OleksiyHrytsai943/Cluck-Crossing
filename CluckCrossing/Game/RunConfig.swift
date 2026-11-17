@@ -4,10 +4,10 @@ import Foundation
 struct RunConfig: Equatable {
     var mode: RunMode
     var feathers = 3
-    /// Heat gained per second on asphalt (0 disables Hot Asphalt for this road).
+    /// Heat gained per second on hot gravel (0 disables Hot Gravel for this road).
     var heatRate = 0.16
-    var whistleDuration = 2.0
-    /// Seconds a frozen lane rushes at 1.6× after the whistle wears off.
+    var bellDuration = 2.0
+    /// Seconds a frozen lane rushes at 1.6× after the bell wears off.
     var rushDuration = 3.0
     var basketBonus = 0.0
     var multiplierStep = 0.2
@@ -31,7 +31,7 @@ struct RunConfig: Equatable {
         var config = RunConfig(mode: mode)
         config.feathers = 3 + level(.spareFeather) + hen.perk.extraFeathers
         config.heatRate = 0.16 * (1 - 0.12 * Double(level(.coolFeet))) * hen.perk.heatFactor
-        config.whistleDuration = 2.0 + 0.5 * Double(level(.longWhistle))
+        config.bellDuration = 2.0 + 0.5 * Double(level(.bigBell))
         config.basketBonus = 0.06 * Double(level(.bigBasket))
         config.multiplierStep = 0.2 + hen.perk.multiplierStepBonus
         config.startGrain = hen.perk.startGrain
@@ -40,7 +40,7 @@ struct RunConfig: Equatable {
         switch mode {
         case .crossing(let index): config.seed = seed ?? CrossingSpec.all[index].seed
         case .daily(let key): config.seed = seed ?? DailyCrossing.seed(for: key)
-        case .nightRun: config.seed = seed ?? UInt64.random(in: 1...UInt64.max)
+        case .longRoad: config.seed = seed ?? UInt64.random(in: 1...UInt64.max)
         }
         return config
     }

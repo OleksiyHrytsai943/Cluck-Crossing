@@ -1,7 +1,7 @@
 import SpriteKit
 import SwiftUI
 
-/// Full-screen run: SpriteKit road + SwiftUI HUD styled like street furniture.
+/// Full-screen run: SpriteKit road + SwiftUI HUD styled like farm signs.
 struct GameView: View {
     @StateObject private var viewModel: GameViewModel
     @ObservedObject private var settings: SettingsStore
@@ -50,7 +50,7 @@ struct GameView: View {
                 PauseView(mode: viewModel.mode, onResume: viewModel.resume, onQuit: viewModel.quitRun)
             }
             if viewModel.phase == .finished, let result = viewModel.result {
-                SpeedCameraView(
+                PrizeCardView(
                     result: result,
                     reward: viewModel.reward,
                     hen: viewModel.store.hen,
@@ -63,7 +63,7 @@ struct GameView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: viewModel.phase)
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
         .statusBarHidden(true)
         .onAppear { viewModel.start() }
         .accessibilityElement(children: .contain)
@@ -85,7 +85,7 @@ struct GameView: View {
                 .accessibilityIdentifier(AccessibilityID.pauseButton)
                 .disabled(!viewModel.isRunning)
 
-                TaxiSign(snapshot: s)
+                WoodSign(snapshot: s)
 
                 FeatherRow(feathers: s.feathers, max: s.maxFeathers)
             }
@@ -105,26 +105,26 @@ struct GameView: View {
 
     private var bottomHUD: some View {
         let s = viewModel.snapshot
-        let whistle = HUDButton(title: "WHISTLE", art: "grain_token", fill: s.grain, ready: s.canWhistle, color: Theme.neonTeal,
-                                caption: s.canWhistle ? "Freeze 3 lanes" : "\(Int(s.grain * 100))% grain") {
-            viewModel.input(.whistle)
+        let bell = HUDButton(title: "BELL", art: "grain_token", fill: s.grain, ready: s.canRing, color: Theme.meadow,
+                                caption: s.canRing ? "Freeze 3 lanes" : "\(Int(s.grain * 100))% grain") {
+            viewModel.input(.bell)
         }
-        .accessibilityIdentifier(AccessibilityID.whistleButton)
-        let roost = HUDButton(title: "ROOST", art: "nest", fill: s.onSafeRow ? 1 : 0, ready: s.canRoost, color: Theme.eggGold,
-                              caption: s.canRoost ? "Bank \(Formatters.number(s.clutch))" : s.onSafeRow ? "Basket empty" : "Islands only") {
+        .accessibilityIdentifier(AccessibilityID.bellButton)
+        let roost = HUDButton(title: "ROOST", art: "nest", fill: s.onSafeRow ? 1 : 0, ready: s.canRoost, color: Theme.wheat,
+                              caption: s.canRoost ? "Bank \(Formatters.number(s.clutch))" : s.onSafeRow ? "Basket empty" : "Hay strips only") {
             viewModel.input(.roost)
         }
         .accessibilityIdentifier(AccessibilityID.roostButton)
 
         return HStack(alignment: .bottom, spacing: 10) {
-            if settings.leftHanded { roost } else { whistle }
-            if viewModel.hazards.hotAsphalt || s.heat > 0 {
+            if settings.leftHanded { roost } else { bell }
+            if viewModel.hazards.hotGravel || s.heat > 0 {
                 HeatGauge(heat: s.heat, active: s.heatActive)
             } else {
                 Spacer().frame(width: 0)
             }
             Spacer(minLength: 0)
-            if settings.leftHanded { whistle } else { roost }
+            if settings.leftHanded { bell } else { roost }
         }
         .padding(.horizontal, 14)
         .padding(.bottom, 8)
@@ -133,8 +133,8 @@ struct GameView: View {
 
 // MARK: - HUD parts
 
-/// Yellow taxi-roof sign: banked score, current basket and the next multiplier.
-struct TaxiSign: View {
+/// Wheat-yellow wooden sign: banked score, current basket and the next multiplier.
+struct WoodSign: View {
     let snapshot: RunSnapshot
 
     var body: some View {
@@ -142,7 +142,7 @@ struct TaxiSign: View {
             HStack(spacing: 6) {
                 Image("egg").resizable().frame(width: 18, height: 18)
                 Text(Formatters.number(snapshot.banked))
-                    .font(Theme.led(22))
+                    .font(Theme.chalkFont(22))
                     .foregroundColor(Theme.ink)
                     .numericTransition()
                     .accessibilityLabel("Banked \(snapshot.banked)")
@@ -157,7 +157,7 @@ struct TaxiSign: View {
                 Text("·")
                 Text("NEXT \(Formatters.multiplier(snapshot.nextMultiplier))")
             }
-            .font(Theme.led(12))
+            .font(Theme.chalkFont(12))
             .foregroundColor(Theme.ink.opacity(0.85))
             .lineLimit(1)
             .minimumScaleFactor(0.7)
@@ -167,7 +167,7 @@ struct TaxiSign: View {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(LinearGradient(colors: [Color(red: 1, green: 0.88, blue: 0.4), Theme.eggGold], startPoint: .top, endPoint: .bottom))
+                .fill(LinearGradient(colors: [Color(red: 1, green: 0.88, blue: 0.4), Theme.wheat], startPoint: .top, endPoint: .bottom))
         )
         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Theme.ink, lineWidth: 2.5))
     }
@@ -201,16 +201,16 @@ struct ProgressBar: View {
     var body: some View {
         GeometryReader { proxy in
             ZStack(alignment: .leading) {
-                Capsule().fill(Color.black.opacity(0.6))
-                Capsule().fill(Theme.neonTeal)
+                Capsule().fill(Theme.panel.opacity(0.7))
+                Capsule().fill(Theme.meadow)
                     .frame(width: proxy.size.width * CGFloat(min(1, max(0, progress))))
-                    .shadow(color: Theme.neonTeal, radius: 4)
+                    .shadow(color: Theme.ink.opacity(0.3), radius: 2, x: 0, y: 2)
             }
         }
     }
 }
 
-/// Big round action button with a fill ring (whistle grain) and a caption.
+/// Big round action button with a fill ring (bell grain) and a caption.
 struct HUDButton: View {
     let title: String
     let art: String
@@ -237,7 +237,7 @@ struct HUDButton: View {
                         .opacity(ready ? 1 : 0.5)
                 }
                 .frame(width: 84, height: 84)
-                .shadow(color: ready ? color : .clear, radius: 10)
+                .shadow(color: Theme.ink.opacity(0.3), radius: 2, x: 0, y: 2)
                 Text(title)
                     .font(Theme.display(17))
                     .foregroundColor(ready ? color : .white.opacity(0.7))
@@ -249,7 +249,7 @@ struct HUDButton: View {
             }
             .frame(width: 104)
             .padding(.vertical, 4)
-            .background(RoundedRectangle(cornerRadius: 18).fill(Color.black.opacity(0.45)))
+            .background(RoundedRectangle(cornerRadius: 18).fill(Theme.panel.opacity(0.75)))
         }
         .buttonStyle(WalkSignalButtonStyle())
         .accessibilityLabel("\(title), \(caption)")
@@ -257,7 +257,7 @@ struct HUDButton: View {
     }
 }
 
-/// Street thermometer for Hot Asphalt.
+/// Barn thermometer for Hot Gravel.
 struct HeatGauge: View {
     let heat: Double
     let active: Bool
@@ -267,14 +267,14 @@ struct HeatGauge: View {
             ZStack(alignment: .bottom) {
                 Capsule().fill(Color.white.opacity(0.9)).frame(width: 18, height: 86)
                 Capsule()
-                    .fill(heat > 0.75 ? Theme.neonRed : Theme.sodium)
+                    .fill(heat > 0.75 ? Theme.tomato : Theme.pumpkin)
                     .frame(width: 10, height: max(10, 82 * CGFloat(min(1, heat))))
                     .padding(.bottom, 2)
             }
             .overlay(Capsule().stroke(Theme.ink, lineWidth: 2))
             Text(active ? "HOT" : "FEET")
-                .font(Theme.led(11))
-                .foregroundColor(active ? Theme.neonRed : .white)
+                .font(Theme.chalkFont(11))
+                .foregroundColor(active ? Theme.tomato : .white)
         }
         .padding(8)
         .background(RoundedRectangle(cornerRadius: 14).fill(Theme.panel.opacity(0.85)))
@@ -294,7 +294,7 @@ struct BannerView: View {
             .padding(.horizontal, 18)
             .padding(.vertical, 8)
             .background(Capsule().fill(Theme.panel.opacity(0.92)))
-            .overlay(Capsule().stroke(banner.color, lineWidth: 2.5).shadow(color: banner.color, radius: 6))
+            .overlay(Capsule().stroke(banner.color, lineWidth: 2.5).shadow(color: Theme.ink.opacity(0.3), radius: 2, x: 0, y: 2))
             .allowsHitTesting(false)
             .accessibilityIdentifier(AccessibilityID.toast)
     }
@@ -312,10 +312,10 @@ struct CountdownView: View {
             Image("signal_stop")
                 .resizable()
                 .frame(width: 110, height: 110)
-            NeonText(text: "\(number)", size: 90, color: Theme.sodium)
+            PaintedText(text: "\(number)", size: 90, color: Theme.pumpkin)
                 .id(number)
                 .transition(.scale.combined(with: .opacity))
-            Text("Wait for the signal…")
+            Text("Wait for the GO sign…")
                 .font(Theme.body(15))
                 .foregroundColor(Theme.mutedText)
         }
@@ -332,12 +332,12 @@ struct PauseView: View {
 
     var body: some View {
         ZStack {
-            Color.black.opacity(0.65).ignoresSafeArea()
+            Theme.soil.opacity(0.6).ignoresSafeArea()
             VStack(spacing: 14) {
                 Image("signal_stop")
                     .resizable()
                     .frame(width: 90, height: 90)
-                NeonText(text: "DON'T WALK", size: 34, color: Theme.sodium)
+                PaintedText(text: "HOLD UP", size: 34, color: Theme.barnRed)
                 Text(mode.title)
                     .font(Theme.headline(18))
                     .foregroundColor(.white)
@@ -347,15 +347,15 @@ struct PauseView: View {
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                 Button("Resume", action: onResume)
-                    .buttonStyle(NeonPillButtonStyle(color: Theme.neonTeal, filled: true))
+                    .buttonStyle(FarmButtonStyle(color: Theme.meadow, filled: true))
                     .accessibilityIdentifier(AccessibilityID.resumeButton)
                 Button("End run", action: onQuit)
-                    .buttonStyle(NeonPillButtonStyle(color: Theme.neonRed))
+                    .buttonStyle(FarmButtonStyle(color: Theme.tomato))
                     .accessibilityIdentifier(AccessibilityID.quitButton)
             }
             .padding(24)
             .background(RoundedRectangle(cornerRadius: 26).fill(Theme.panel))
-            .overlay(RoundedRectangle(cornerRadius: 26).stroke(Theme.sodium, lineWidth: 2))
+            .overlay(RoundedRectangle(cornerRadius: 26).stroke(Theme.pumpkin, lineWidth: 2))
             .padding(28)
             .frame(maxWidth: Theme.maxContentWidth)
         }

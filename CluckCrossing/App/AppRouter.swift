@@ -1,7 +1,7 @@
 import Combine
 import SwiftUI
 
-/// Sections reachable from the signpost on the street corner.
+/// Sections reachable from the signpost in the farmyard.
 enum Route: String, CaseIterable, Identifiable {
     case timetable, roster, vending, henhouse, billboard, rulebook
 
@@ -9,12 +9,12 @@ enum Route: String, CaseIterable, Identifiable {
 
     var signTitle: String {
         switch self {
-        case .timetable: "Timetable"
+        case .timetable: "Route Board"
         case .roster: "Top Players"
-        case .vending: "Vending"
+        case .vending: "Feed Store"
         case .henhouse: "Henhouse"
-        case .billboard: "Billboard"
-        case .rulebook: "Rulebook"
+        case .billboard: "Barn Wall"
+        case .rulebook: "Almanac"
         }
     }
 
@@ -24,7 +24,7 @@ enum Route: String, CaseIterable, Identifiable {
         case .roster: "Weekly roster"
         case .vending: "Upgrades"
         case .henhouse: "Your hens"
-        case .billboard: "Records"
+        case .billboard: "Ribbons & records"
         case .rulebook: "How to play"
         }
     }
@@ -32,11 +32,11 @@ enum Route: String, CaseIterable, Identifiable {
     var art: String {
         switch self {
         case .timetable: "star_on"
-        case .roster: "plaque_hot"
+        case .roster: "ribbon_0"
         case .vending: "upgrade_cornPouch"
         case .henhouse: "hen_pepper"
-        case .billboard: "egg"
-        case .rulebook: "signal_walk"
+        case .billboard: "ribbon_2"
+        case .rulebook: "egg"
         }
     }
 }

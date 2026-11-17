@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Hosts the street corner, pushes sections over it and presents runs full screen.
+/// Hosts the farmyard, pushes sections over it and presents runs full screen.
 struct RootView: View {
     let dependencies: AppDependencies
     @StateObject private var router = AppRouter()
@@ -39,7 +39,7 @@ struct RootView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
         .sheet(isPresented: $router.showSettings) {
             SettingsView(settings: dependencies.settings, store: store, sound: dependencies.sound, onReplayTutorial: {
                 router.showSettings = false

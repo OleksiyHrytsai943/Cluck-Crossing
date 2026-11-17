@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Records on a rooftop: an LED ticker board with lifetime stats, neon-sign achievements
-/// (lit when earned) and the trip log of recent runs.
+/// Records on the barn wall: a chalkboard of lifetime stats, county-fair ribbons
+/// (coloured when earned) and the trip log of recent runs.
 struct BillboardView: View {
     @ObservedObject var store: ProfileStore
     @ObservedObject var router: AppRouter
@@ -11,14 +11,14 @@ struct BillboardView: View {
 
     var body: some View {
         VStack(spacing: 10) {
-            StreetHeader(title: "BILLBOARD", color: Theme.neonPink, coins: store.coins, onBack: router.back)
+            FarmHeader(title: "BARN WALL", color: Theme.wheat, coins: store.coins, onBack: router.back)
             ScrollView {
                 VStack(spacing: 18) {
                     ledBoard
-                    section("NEON SIGNS", detail: "\(profile.achievements.count)/\(Achievement.allCases.count) lit")
+                    section("RIBBONS", detail: "\(profile.achievements.count)/\(Achievement.allCases.count) won")
                     LazyVGrid(columns: columns, spacing: 10) {
                         ForEach(Achievement.allCases) { a in
-                            neonSign(a)
+                            ribbon(a)
                         }
                     }
                     section("TRIP LOG", detail: profile.history.isEmpty ? "No trips yet" : "Last \(profile.history.count)")
@@ -37,10 +37,10 @@ struct BillboardView: View {
 
     private func section(_ title: String, detail: String) -> some View {
         HStack(alignment: .lastTextBaseline) {
-            NeonText(text: title, size: 22, color: Theme.neonTeal)
+            PaintedText(text: title, size: 22, color: Theme.meadow)
             Spacer()
             Text(detail)
-                .font(Theme.led(13))
+                .font(Theme.chalkFont(13))
                 .foregroundColor(Theme.mutedText)
         }
     }
@@ -52,9 +52,9 @@ struct BillboardView: View {
             ("egg", "EGGS BANKED", Formatters.number(stats.eggsBanked)),
             ("nest", "BEST ROOST", Formatters.number(stats.bestRoost)),
             ("plaque", "BEST STREAK", "\(stats.bestStreak) lanes"),
-            ("signal_walk", "NIGHT RUN", "\(profile.bestNightLanes) lanes"),
+            ("signal_walk", "LONG ROAD", "\(profile.bestLongRoadLanes) lanes"),
             ("kernel", "KERNELS", Formatters.number(stats.kernels)),
-            ("grain_token", "WHISTLES", Formatters.number(stats.whistles)),
+            ("grain_token", "BELLS RUNG", Formatters.number(stats.bells)),
             ("feather", "BUMPS", Formatters.number(stats.bumps)),
             ("coin", "COINS EARNED", Formatters.number(stats.coinsEarned)),
             ("hen_pepper", "RUNS", Formatters.number(stats.runs)),
@@ -64,48 +64,48 @@ struct BillboardView: View {
                 HStack(spacing: 10) {
                     ArtIcon(name: item.0, size: 30, tint: Color.white.opacity(0.08))
                     Text(item.1)
-                        .font(Theme.led(13))
-                        .foregroundColor(Theme.led.opacity(0.85))
+                        .font(Theme.chalkFont(13))
+                        .foregroundColor(Theme.chalk.opacity(0.85))
                     Spacer()
                     Text(item.2)
-                        .font(Theme.led(17))
-                        .foregroundColor(Theme.led)
+                        .font(Theme.chalkFont(17))
+                        .foregroundColor(Theme.chalk)
                 }
                 .padding(.vertical, 5)
                 .accessibilityElement(children: .combine)
             }
         }
         .padding(14)
-        .background(RoundedRectangle(cornerRadius: 16).fill(Color.black.opacity(0.92)))
-        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(white: 0.3), lineWidth: 6))
+        .background(RoundedRectangle(cornerRadius: 16).fill(Theme.chalkboard))
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color(red: 0.55, green: 0.38, blue: 0.2), lineWidth: 8))
     }
 
-    private func neonSign(_ a: Achievement) -> some View {
-        let lit = profile.has(a)
-        let colors = [Theme.neonPink, Theme.neonTeal, Theme.eggGold, Theme.neonRed]
+    /// A county-fair ribbon pinned to the barn: coloured when won, faded paper when not.
+    private func ribbon(_ a: Achievement) -> some View {
+        let won = profile.has(a)
         return VStack(spacing: 4) {
+            Image(won ? "ribbon_\(a.tint)" : "ribbon_off")
+                .resizable()
+                .scaledToFit()
+                .frame(height: 64)
             Text(a.title.uppercased())
-                .font(Theme.display(17))
-                .foregroundColor(lit ? .white : Color(white: 0.45))
-                .shadow(color: lit ? colors[a.tint] : .clear, radius: 6)
+                .font(Theme.display(16))
+                .foregroundColor(won ? .white : Theme.mutedText.opacity(0.7))
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             Text(a.detail)
                 .font(Theme.body(11))
-                .foregroundColor(lit ? Theme.cream : Color(white: 0.55))
+                .foregroundColor(won ? Theme.cream : Theme.mutedText.opacity(0.7))
                 .multilineTextAlignment(.center)
                 .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 14)
-        .frame(maxWidth: .infinity, minHeight: 96)
-        .background(
-            Image(lit ? "neon_on_\(a.tint)" : "neon_off")
-                .resizable()
-        )
+        .padding(10)
+        .frame(maxWidth: .infinity, minHeight: 150, alignment: .top)
+        .background(RoundedRectangle(cornerRadius: 14).fill(Theme.panel.opacity(won ? 0.95 : 0.8)))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(won ? Theme.wheat : Color.clear, lineWidth: 2))
         .accessibilityElement(children: .combine)
-        .accessibilityValue(lit ? "Earned" : "Locked")
+        .accessibilityValue(won ? "Earned" : "Locked")
         .accessibilityIdentifier(AccessibilityID.achievement(a))
     }
 
@@ -131,11 +131,11 @@ struct BillboardView: View {
                     if record.stars > 0 { StarRow(stars: record.stars, size: 13) }
                     VStack(alignment: .trailing, spacing: 1) {
                         Text(Formatters.number(record.banked))
-                            .font(Theme.led(15))
-                            .foregroundColor(Theme.eggGold)
+                            .font(Theme.chalkFont(15))
+                            .foregroundColor(Theme.wheat)
                         Text(record.crossed ? "CROSSED" : "\(record.lanes) LANES")
-                            .font(Theme.led(10))
-                            .foregroundColor(record.crossed ? Theme.neonTeal : Theme.mutedText)
+                            .font(Theme.chalkFont(10))
+                            .foregroundColor(record.crossed ? Theme.meadow : Theme.mutedText)
                     }
                     .frame(width: 80, alignment: .trailing)
                 }

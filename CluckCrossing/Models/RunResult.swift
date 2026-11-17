@@ -11,7 +11,7 @@ struct RunResult: Equatable, Codable {
     var eggsBanked: Int
     var kernels: Int
     var kernelCoins: Int
-    var whistles: Int
+    var bells: Int
     var hits: Int
     var roosts: Int
     var forcedHops: Int

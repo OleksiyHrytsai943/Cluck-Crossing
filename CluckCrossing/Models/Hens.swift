@@ -24,14 +24,14 @@ struct Hen: Identifiable, Equatable {
     static let starter = "pepper"
 
     static let all: [Hen] = [
-        Hen(id: "pepper", name: "Pepper", breed: "White Leghorn", perkTitle: "Street Smart",
+        Hen(id: "pepper", name: "Pepper", breed: "White Leghorn", perkTitle: "Farm Smart",
             perkText: "Balanced. No tricks, no weaknesses.", price: 0, perk: HenPerk()),
         Hen(id: "dot", name: "Dot", breed: "Speckled Sussex", perkTitle: "Full Crop",
-            perkText: "Starts every run with the whistle half full.", price: 450, perk: HenPerk(startGrain: 0.5)),
+            perkText: "Starts every run with the farm bell half full.", price: 450, perk: HenPerk(startGrain: 0.5)),
         Hen(id: "sunny", name: "Sunny", breed: "Buff Orpington", perkTitle: "Thick Socks",
-            perkText: "Feet heat up 20% slower on hot asphalt.", price: 900, perk: HenPerk(heatFactor: 0.8)),
+            perkText: "Feet heat up 20% slower on hot gravel.", price: 900, perk: HenPerk(heatFactor: 0.8)),
         Hen(id: "comet", name: "Comet", breed: "Red Rooster Racer", perkTitle: "Daredevil",
-            perkText: "Clutch multiplier climbs +0.05 faster per lane.", price: 1_400, perk: HenPerk(multiplierStepBonus: 0.05)),
+            perkText: "Basket multiplier climbs +0.05 faster per lane.", price: 1_400, perk: HenPerk(multiplierStepBonus: 0.05)),
         Hen(id: "inkwell", name: "Inkwell", breed: "Black Australorp", perkTitle: "Shadow Step",
             perkText: "Stays untouchable 1 second longer after a bump.", price: 2_000, perk: HenPerk(invulnerabilityBonus: 1)),
         Hen(id: "duchess", name: "Duchess", breed: "Silkie", perkTitle: "Fluffy Armor",

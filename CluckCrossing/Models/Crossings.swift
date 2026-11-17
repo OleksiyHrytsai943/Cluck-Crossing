@@ -3,16 +3,16 @@ import Foundation
 /// Which hazards a road uses. Districts switch them on one by one so the first crossings stay gentle.
 nonisolated struct HazardSet: Equatable, Codable {
     var cornTrucks: Bool
-    var manholes: Bool
-    var hotAsphalt: Bool
-    /// Unlit road: cars beyond the street lamps show only their headlights (scene effect).
-    var blackout: Bool
+    var sprinklers: Bool
+    var hotGravel: Bool
+    /// Foggy road: vehicles away from the hen show only their fog lights (scene effect).
+    var fog: Bool
 
-    static let none = HazardSet(cornTrucks: false, manholes: false, hotAsphalt: false, blackout: false)
-    static let all = HazardSet(cornTrucks: true, manholes: true, hotAsphalt: true, blackout: false)
+    static let none = HazardSet(cornTrucks: false, sprinklers: false, hotGravel: false, fog: false)
+    static let all = HazardSet(cornTrucks: true, sprinklers: true, hotGravel: true, fog: false)
 }
 
-/// A city district: six crossings that introduce one new hazard.
+/// A farm district: six crossings that introduce one new hazard.
 nonisolated struct District: Identifiable, Equatable {
     let id: Int
     let name: String
@@ -22,28 +22,28 @@ nonisolated struct District: Identifiable, Equatable {
     let art: String
 
     static let all: [District] = [
-        District(id: 0, name: "Sleepy Lane", tagline: "Quiet suburb, slow sedans.",
-                 newHazard: "Hop lane by lane, rest on the islands and Roost your clutch before the traffic gets you.",
-                 art: "district_sleepy"),
-        District(id: 1, name: "Market Street", tagline: "Delivery hour by the night market.",
-                 newHazard: "Corn Trucks honk before they roll in. They are long, but they spill corn that fills your whistle.",
-                 art: "district_market"),
-        District(id: 2, name: "Steam Quarter", tagline: "Old pipes under every crossing.",
-                 newHazard: "Manholes glow orange, then flare. Never stand on a glowing lid.",
-                 art: "district_steam"),
-        District(id: 3, name: "Neon Boulevard", tagline: "Rush hour under the signs.",
-                 newHazard: "Hot Asphalt: your feet heat up on the road. When the thermometer is full you hop forward on your own.",
-                 art: "district_neon"),
-        District(id: 4, name: "Midnight Expressway", tagline: "No lamps. Only headlights.",
-                 newHazard: "Blackout: far traffic shows only headlights. Every hazard is active and the cars are fast.",
-                 art: "district_midnight"),
+        District(id: 0, name: "Meadow Lane", tagline: "Daisies, cows and slow pickups.",
+                 newHazard: "Hop lane by lane, rest on the hay strips and Roost your basket before the traffic gets you.",
+                 art: "district_meadow"),
+        District(id: 1, name: "Harvest Road", tagline: "Corn season on the county road.",
+                 newHazard: "Corn Trucks honk before they roll in. They are long, but they spill corn that fills your farm bell.",
+                 art: "district_harvest"),
+        District(id: 2, name: "Orchard Row", tagline: "Sprinklers between the apple trees.",
+                 newHazard: "Sprinklers gurgle, then shoot a jet of water. Never stand on a gurgling sprinkler.",
+                 art: "district_orchard"),
+        District(id: 3, name: "Sunbaked Gravel", tagline: "High noon on the dusty road.",
+                 newHazard: "Hot Gravel: your feet heat up on the road. When the thermometer is full you hop forward on your own.",
+                 art: "district_gravel"),
+        District(id: 4, name: "Foggy Hollow", tagline: "Morning fog in the valley.",
+                 newHazard: "Fog: far traffic shows only fog lights. Every hazard is active and the tractors are fast.",
+                 art: "district_fog"),
     ]
 }
 
 /// One campaign crossing: a fixed, seeded road from curb to curb.
 nonisolated struct CrossingSpec: Identifiable, Equatable {
     let id: Int
-    /// Lanes between islands, bottom to top.
+    /// Lanes between hay strips, bottom to top.
     let sections: [Int]
     /// 0 (gentle) … 1 (expressway).
     let difficulty: Double
@@ -64,7 +64,7 @@ nonisolated struct CrossingSpec: Identifiable, Equatable {
         let district = index / perDistrict
         let step = index % perDistrict
         var rng = SeededGenerator(seed: UInt64(1217 + index * 7919))
-        // Longer roads and wider sections as the city gets busier.
+        // Longer roads and wider sections as the county gets busier.
         let total = 5 + index + index / 3
         let maxSection = min(6, 2 + district + step / 3)
         var sections: [Int] = []
@@ -77,9 +77,9 @@ nonisolated struct CrossingSpec: Identifiable, Equatable {
         let difficulty = 0.06 + 0.84 * Double(index) / Double(count - 1)
         let hazards = HazardSet(
             cornTrucks: district >= 1,
-            manholes: district >= 2,
-            hotAsphalt: district >= 3,
-            blackout: district >= 4
+            sprinklers: district >= 2,
+            hotGravel: district >= 3,
+            fog: district >= 4
         )
         return CrossingSpec(id: index, sections: sections, difficulty: difficulty, hazards: hazards, seed: UInt64(5_000 + index))
     }
@@ -88,18 +88,18 @@ nonisolated struct CrossingSpec: Identifiable, Equatable {
 /// What the player is running.
 enum RunMode: Equatable, Codable, Hashable {
     case crossing(Int)
-    case nightRun
+    case longRoad
     case daily(String)
 
     var title: String {
         switch self {
         case .crossing(let index): CrossingSpec.all[index].title
-        case .nightRun: "Night Run"
+        case .longRoad: "Long Road"
         case .daily: "Daily Crossing"
         }
     }
 
-    var isEndless: Bool { self == .nightRun }
+    var isEndless: Bool { self == .longRoad }
 }
 
 /// The Daily Crossing is the same road for everyone on the same UTC day.

@@ -1,16 +1,16 @@
 import Foundation
 
-/// Neon signs on the Billboard roof. Lit when earned.
+/// Fair ribbons pinned to the barn wall. Coloured when earned.
 enum Achievement: String, CaseIterable, Identifiable, Codable {
     case firstSteps
-    case sleepyLane, marketStreet, steamQuarter, neonBoulevard, midnightExpressway
+    case meadowLane, harvestRoad, orchardRow, sunbakedGravel, foggyHollow
     case tenInARow
     case heavyBasket
-    case crossingGuard
+    case bellRinger
     case cornCollector
-    case starryNight
-    case nightOwl
-    case dailyCommuter
+    case starHarvest
+    case longHauler
+    case dailyChores
     case notAScratch
     case fullCoop
 
@@ -19,18 +19,18 @@ enum Achievement: String, CaseIterable, Identifiable, Codable {
     var title: String {
         switch self {
         case .firstSteps: "First Steps"
-        case .sleepyLane: "Sleepy Lane"
-        case .marketStreet: "Market Street"
-        case .steamQuarter: "Steam Quarter"
-        case .neonBoulevard: "Neon Boulevard"
-        case .midnightExpressway: "Expressway"
+        case .meadowLane: "Meadow Lane"
+        case .harvestRoad: "Harvest Road"
+        case .orchardRow: "Orchard Row"
+        case .sunbakedGravel: "Sunbaked Gravel"
+        case .foggyHollow: "Foggy Hollow"
         case .tenInARow: "Ten in a Row"
         case .heavyBasket: "Heavy Basket"
-        case .crossingGuard: "Crossing Guard"
+        case .bellRinger: "Bell Ringer"
         case .cornCollector: "Corn Collector"
-        case .starryNight: "Starry Night"
-        case .nightOwl: "Night Owl"
-        case .dailyCommuter: "Commuter"
+        case .starHarvest: "Star Harvest"
+        case .longHauler: "Long Hauler"
+        case .dailyChores: "Daily Chores"
         case .notAScratch: "Not a Scratch"
         case .fullCoop: "Full Coop"
         }
@@ -39,27 +39,27 @@ enum Achievement: String, CaseIterable, Identifiable, Codable {
     var detail: String {
         switch self {
         case .firstSteps: "Finish your first crossing."
-        case .sleepyLane: "Finish every crossing in Sleepy Lane."
-        case .marketStreet: "Finish every crossing in Market Street."
-        case .steamQuarter: "Finish every crossing in Steam Quarter."
-        case .neonBoulevard: "Finish every crossing in Neon Boulevard."
-        case .midnightExpressway: "Finish every crossing on the Midnight Expressway."
+        case .meadowLane: "Finish every crossing on Meadow Lane."
+        case .harvestRoad: "Finish every crossing on Harvest Road."
+        case .orchardRow: "Finish every crossing on Orchard Row."
+        case .sunbakedGravel: "Finish every crossing on Sunbaked Gravel."
+        case .foggyHollow: "Finish every crossing in Foggy Hollow."
         case .tenInARow: "Cross 10 lanes in one streak without roosting."
-        case .heavyBasket: "Roost a clutch worth 300 or more."
-        case .crossingGuard: "Blow the whistle 25 times."
+        case .heavyBasket: "Roost a basket worth 300 or more."
+        case .bellRinger: "Ring the farm bell 25 times."
         case .cornCollector: "Pick up 100 corn kernels."
-        case .starryNight: "Collect 45 stars."
-        case .nightOwl: "Cross 60 lanes in one Night Run."
-        case .dailyCommuter: "Finish a Daily Crossing."
-        case .notAScratch: "Finish a crossing from Market Street on without a bump."
+        case .starHarvest: "Collect 45 stars."
+        case .longHauler: "Cross 60 lanes in one Long Road."
+        case .dailyChores: "Finish a Daily Crossing."
+        case .notAScratch: "Finish a crossing from Harvest Road on without a bump."
         case .fullCoop: "Adopt every hen."
         }
     }
 
-    /// The neon sign colour family (scene art name suffix).
+    /// Prize ribbon colour (art name suffix).
     var tint: Int { (Self.allCases.firstIndex(of: self) ?? 0) % 4 }
 
     static func district(_ index: Int) -> Achievement {
-        [.sleepyLane, .marketStreet, .steamQuarter, .neonBoulevard, .midnightExpressway][index]
+        [.meadowLane, .harvestRoad, .orchardRow, .sunbakedGravel, .foggyHollow][index]
     }
 }
