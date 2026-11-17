@@ -63,7 +63,10 @@ struct RootView: View {
         }
         .onAppear {
             if !store.profile.tutorialSeen { router.showTutorial = true }
-            if let name = dependencies.openRoute, let route = Route(rawValue: name) { router.route = route }
+            if let name = dependencies.openRoute {
+                if let route = Route(rawValue: name) { router.route = route }
+                if name == "run" { router.launch = GameLaunch(mode: .crossing(store.profile.nextCrossing)) }
+            }
             dependencies.sound.playMusic(.menu)
         }
         .onChange(of: router.launch) { launch in

@@ -124,8 +124,9 @@ final class CrossingScene: SKScene {
         return p
     }
 
+    /// Keeps the hen at 30% height so she never sits behind the bottom HUD (rows below 0 render as sidewalk).
     private var cameraTarget: CGFloat {
-        max(-cell * 0.5, henTarget.y - size.height * 0.3)
+        henTarget.y - size.height * 0.3
     }
 
     // MARK: Loop
