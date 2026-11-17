@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Night Shift Roster</title>
+<style>
+  :root {
+    --night: #080d1c; --panel: #120e24; --pink: #ff5fd2; --teal: #2ee6d6;
+    --gold: #ffd54a; --sodium: #ffb347; --cream: #fff4dc; --muted: #bfc4d9;
+  }
+  * { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  html, body { margin: 0; background: transparent; color: #fff;
+    font-family: "Avenir Next", -apple-system, sans-serif; -webkit-text-size-adjust: 100%; }
+  .wrap { padding: 4px 2px 16px; }
+  .neon { font-family: "Avenir Next Condensed", "Avenir Next", sans-serif; font-weight: 800; letter-spacing: .5px;
+    text-shadow: 0 0 4px currentColor, 0 0 12px currentColor; }
+  .theme { border: 2px solid var(--sodium); border-radius: 18px; padding: 12px 14px; background: var(--panel);
+    box-shadow: 0 0 14px rgba(255,179,71,.35); margin-bottom: 14px; }
+  .theme .label { font: 700 12px Menlo, monospace; color: var(--sodium); }
+  .theme h2 { margin: 2px 0 4px; font-size: 22px; color: var(--sodium); }
+  .theme p { margin: 0; color: var(--cream); font-size: 15px; }
+  .preview { font: 700 11px Menlo, monospace; color: #111; background: var(--gold); border-radius: 8px;
+    padding: 6px 10px; margin-bottom: 12px; line-height: 1.35; }
+  h3 { margin: 18px 4px 8px; font-size: 20px; color: var(--teal); }
+  .board { background: #000; border: 6px solid #3a3a46; border-radius: 16px; padding: 6px 10px; }
+  .row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+  .row:last-child { border-bottom: none; }
+  .rank { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+    font: 800 17px Menlo, monospace; color: #111; background: var(--muted); flex: none; }
+  .r1 .rank { background: var(--gold); box-shadow: 0 0 10px var(--gold); }
+  .r2 .rank, .r3 .rank { background: var(--teal); }
+  .hen { width: 38px; height: 38px; flex: none; }
+  .name { flex: 1; font-weight: 700; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .me .name { color: var(--pink); }
+  .score { font: 700 17px Menlo, monospace; color: #ffa028; }
+  .empty { color: var(--muted); padding: 14px 4px; font-size: 15px; }
+  .slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .slot { border: 2px solid var(--pink); border-radius: 14px; padding: 10px 6px; text-align: center; background: var(--panel);
+    box-shadow: 0 0 10px rgba(255,95,210,.35); }
+  .slot .ranks { font: 800 12px Menlo, monospace; color: var(--pink); }
+  .slot .title { font-weight: 800; font-size: 14px; margin: 4px 0; }
+  .slot .coins { font: 700 14px Menlo, monospace; color: var(--gold); }
+  .slot .state { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .lamps { display: flex; justify-content: space-between; padding: 10px 6px; background: var(--panel);
+    border-radius: 14px; border: 2px solid rgba(255,179,71,.6); }
+  .lamp { width: 30px; height: 44px; position: relative; }
+  .lamp .pole { position: absolute; left: 13px; top: 12px; width: 4px; height: 32px; background: #2b2d36; }
+  .lamp .bulb { position: absolute; left: 6px; top: 0; width: 18px; height: 14px; border-radius: 8px 8px 4px 4px; background: #3a3a46; }
+  .lamp.on .bulb { background: var(--sodium); box-shadow: 0 0 12px var(--sodium), 0 0 24px rgba(255,179,71,.6); }
+  .foot { color: var(--muted); font-size: 13px; margin: 8px 4px 0; line-height: 1.4; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="theme">
+    <div class="label" id="week">THIS WEEK</div>
+    <h2 class="neon" id="themeTitle">Night Shift</h2>
+    <p id="themeDetail"></p>
+  </div>
+  <div class="preview" id="notice" hidden></div>
+
+  <h3 class="neon">TOP 5 THIS WEEK</h3>
+  <div class="board" id="board"><div class="empty">Loading the roster…</div></div>
+
+  <h3 class="neon">WEEKLY REWARDS</h3>
+  <div class="slots" id="slots"></div>
+
+  <h3 class="neon">LAMP LIGHTER</h3>
+  <div class="lamps" id="lamps"></div>
+  <p class="foot" id="lampText"></p>
+</div>
+<script>
+  // The app replaces the placeholder below with the LeaderboardPage JSON (see RosterWebView).
+  const ROSTER_DATA = /*ROSTER_DATA*/null;
+  const HEN_IMAGES = /*HEN_IMAGES*/{};
+  function esc(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function renderBoard(data) {
+    document.getElementById('week').textContent = data.weekKey + ' · ' + data.daysLeft + (data.daysLeft === 1 ? ' DAY LEFT' : ' DAYS LEFT');
+    document.getElementById('themeTitle').textContent = data.themeTitle;
+    document.getElementById('themeDetail').textContent = data.themeDetail;
+    const notice = document.getElementById('notice');
+    notice.hidden = !data.isPreview;
+    notice.textContent = data.notice;
+
+    const board = document.getElementById('board');
+    if (!data.entries.length) {
+      board.innerHTML = '<div class="empty">No runs this week yet.</div>';
+    } else {
+      board.innerHTML = data.entries.map(e =>
+        '<div class="row r' + e.rank + (e.isPlayer ? ' me' : '') + '">' +
+        '<div class="rank">' + e.rank + '</div>' +
+        '<img class="hen" src="' + (HEN_IMAGES[e.hen] || '') + '" alt="">' +
+        '<div class="name">' + esc(e.name) + '</div>' +
+        '<div class="score">' + e.score.toLocaleString('en-US') + '</div></div>').join('');
+    }
+
+    document.getElementById('slots').innerHTML = data.rewards.map(r =>
+      '<div class="slot"><div class="ranks">#' + esc(r.ranks) + '</div><div class="title">' + esc(r.title) +
+      '</div><div class="coins">' + r.coins + ' coins</div><div class="state">' +
+      (data.isPreview ? 'Opens with the live roster' : 'Paid on Monday') + '</div></div>').join('');
+
+    let lamps = '';
+    for (let i = 0; i < data.lampsPerWeek; i++) {
+      lamps += '<div class="lamp' + (i < data.lampsLit ? ' on' : '') + '"><div class="bulb"></div><div class="pole"></div></div>';
+    }
+    document.getElementById('lamps').innerHTML = lamps;
+    document.getElementById('lampText').textContent =
+      data.lampsLit + ' of ' + data.lampsPerWeek + ' lamps lit. Every night you play lights one more lamp on your block.';
+  }
+  if (ROSTER_DATA) { renderBoard(ROSTER_DATA); }
+</script>
+</body>
+</html>
