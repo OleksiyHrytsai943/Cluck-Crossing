@@ -7,10 +7,9 @@ struct VendingView: View {
     @ObservedObject private var store: ProfileStore
     @ObservedObject var router: AppRouter
 
-    init(viewModel: @autoclosure @escaping () -> VendingViewModel, router: AppRouter) {
-        let vm = viewModel()
-        _viewModel = StateObject(wrappedValue: vm)
-        store = vm.store
+    init(viewModel: @autoclosure @escaping () -> VendingViewModel, store: ProfileStore, router: AppRouter) {
+        _viewModel = StateObject(wrappedValue: viewModel())
+        self.store = store
         self.router = router
     }
 

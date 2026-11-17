@@ -223,14 +223,14 @@ final class ProfileStore: ObservableObject {
 
     // MARK: Test & tour seeding
 
-    func seed(coins: Int? = nil, clearedCrossings: Int = 0, stars: Int = 2) {
+    func seed(coins: Int? = nil, clearedCrossings: Int = 0, stars: Int = 2, introsSeen: Bool = true) {
         commit { p in
             if let coins { p.coins = coins }
             for i in 0..<min(clearedCrossings, CrossingSpec.count) {
                 p.stars[i] = max(p.stars[i], stars)
                 p.bestScores[i] = max(p.bestScores[i], StarRule.thresholds(for: CrossingSpec.all[i]).two)
             }
-            p.districtIntrosSeen = Array(0..<District.all.count)
+            if introsSeen { p.districtIntrosSeen = Array(0..<District.all.count) }
         }
     }
 

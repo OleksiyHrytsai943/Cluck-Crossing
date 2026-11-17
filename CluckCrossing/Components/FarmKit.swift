@@ -16,6 +16,7 @@ struct Backdrop: ViewModifier {
                     .frame(width: proxy.size.width, height: proxy.size.height)
                     .clipped()
                     .overlay(Color.black.opacity(dim))
+                    .allowsHitTesting(false)
             }
             .ignoresSafeArea()
         }

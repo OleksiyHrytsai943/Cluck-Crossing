@@ -18,7 +18,7 @@ final class GameViewModel: ObservableObject {
         let color: Color
     }
 
-    let mode: RunMode
+    @Published private(set) var mode: RunMode
     let isAutopilot: Bool
     let store: ProfileStore
     let settings: SettingsStore
@@ -33,6 +33,8 @@ final class GameViewModel: ObservableObject {
     @Published private(set) var reward: RunReward?
     /// Shows the "tap / swipe" hint during the first seconds of the first crossings.
     @Published private(set) var showControlsHint = false
+    /// District card shown when "Next crossing" enters a district the player has not seen yet.
+    @Published private(set) var districtIntro: AppRouter.DistrictIntro?
 
     private(set) var session: RunSession
     private var scene: CrossingScene?
@@ -114,16 +116,43 @@ final class GameViewModel: ObservableObject {
     }
 
     func restart() {
+        load(mode)
+        start()
+    }
+
+    /// "Next crossing" on the result card: switches to the next road without leaving the game screen.
+    func playNext() {
+        guard let next = nextMode else { return }
+        load(next)
+        if case .crossing(let index) = next {
+            let district = CrossingSpec.all[index].district.id
+            if !store.profile.districtIntrosSeen.contains(district) {
+                districtIntro = AppRouter.DistrictIntro(crossing: index)
+                return
+            }
+        }
+        start()
+    }
+
+    func startAfterIntro() {
+        if let intro = districtIntro { store.markDistrictIntroSeen(intro.district.id) }
+        districtIntro = nil
+        start()
+    }
+
+    /// Fresh session for `newMode`; the scene rebuilds its rows for the new road.
+    private func load(_ newMode: RunMode) {
         countdownTask?.cancel()
         countdownTask = nil
-        session = RunSession(config: store.runConfig(for: mode, seed: seed))
+        bannerTask?.cancel()
+        mode = newMode
+        session = RunSession(config: store.runConfig(for: newMode, seed: seed))
         snapshot = session.snapshot
         result = nil
         reward = nil
         banner = nil
-        scene?.reset()
         phase = .countdown(3)
-        start()
+        scene?.reset()
     }
 
     // MARK: Input

@@ -109,9 +109,16 @@ final class CrossingScene: SKScene {
 
     /// New run on the same scene (Try again).
     func reset() {
-        layout()
-        hen.alpha = 1
+        if let mode = viewModel?.mode, case .crossing(let index) = mode {
+            fog = CrossingSpec.all[index].hazards.fog
+        } else {
+            fog = false
+        }
         hen.removeAllActions()
+        hen.zRotation = 0
+        hen.alpha = 1
+        lastColumn = RunConfig.columns / 2
+        layout()
     }
 
     // MARK: Geometry

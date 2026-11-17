@@ -205,6 +205,83 @@ final class CluckCrossingUITests: XCTestCase {
 
     // MARK: Screenshot tour (attachments used for the site)
 
+    // MARK: Crossing flow regressions
+
+    private func waitForGame(_ title: String, timeout: TimeInterval = 10) {
+        let game = element("game.screen")
+        expectation(for: NSPredicate(format: "exists == true AND value == %@", title), evaluatedWith: game)
+        waitForExpectations(timeout: timeout)
+    }
+
+    func testNextCrossingButtonStartsTheNextRoad() {
+        launch(["--autopilot"])
+        waitFor("corner.walk").tap()
+        waitForGame("Meadow Lane 1")
+        waitFor("result.screen", timeout: 90)
+        waitFor("result.next").tap()
+        waitForGame("Meadow Lane 2")
+        XCTAssertFalse(element("result.screen").exists)
+        // The new road really runs: it finishes and offers the crossing after it.
+        waitFor("result.screen", timeout: 120)
+        waitFor("result.next").tap()
+        waitForGame("Meadow Lane 3")
+    }
+
+    func testRouteBoardStillStartsCrossingsAfterNext() {
+        launch(["--autopilot"])
+        waitFor("corner.walk").tap()
+        waitFor("result.screen", timeout: 90)
+        waitFor("result.next").tap()
+        waitForGame("Meadow Lane 2")
+        waitFor("result.screen", timeout: 120)
+        element("result.home").tap()
+        waitFor("corner.screen")
+        element("sign.timetable").tap()
+        waitFor("timetable.screen")
+        waitFor("crossing.2").tap()
+        waitForGame("Meadow Lane 3")
+    }
+
+    func testUnlockedLastMeadowCrossingCanBePicked() {
+        launch(["--cleared=5"])
+        waitFor("sign.timetable").tap()
+        waitFor("timetable.screen")
+        waitFor("crossing.5").tap()
+        waitForGame("Meadow Lane 6")
+    }
+
+    func testLastRowOfEveryUnlockedDistrictCanBePicked() {
+        launch(["--cleared=11"])
+        waitFor("sign.timetable").tap()
+        waitFor("timetable.screen")
+        waitFor("crossing.11").tap()
+        waitForGame("Harvest Road 6")
+    }
+
+    func testNextIntoNewDistrictShowsItsCardInsideTheGame() {
+        launch(["--cleared=5", "--autopilot", "--show-intros"])
+        waitFor("sign.timetable").tap()
+        waitFor("crossing.5").tap()
+        // Meadow Lane was never introduced in this profile, so its card comes first.
+        if element("district.card").waitForExistence(timeout: 3) { element("district.start").tap() }
+        waitForGame("Meadow Lane 6")
+        waitFor("result.screen", timeout: 120)
+        waitFor("result.next").tap()
+        waitFor("district.card")
+        waitFor("district.start").tap()
+        waitForGame("Harvest Road 1")
+    }
+
+    func testTryAgainReplaysTheSameRoad() {
+        launch(["--autopilot"])
+        waitFor("corner.walk").tap()
+        waitFor("result.screen", timeout: 90)
+        waitFor("result.again").tap()
+        waitForGame("Meadow Lane 1")
+        XCTAssertFalse(element("result.screen").exists)
+        waitFor("result.screen", timeout: 90)
+    }
+
     func testTour() {
         launch(["--cleared=9", "--coins=4200", "--autopilot", "--sunflowers=4"])
         shot("01-corner", wait: "corner.screen")

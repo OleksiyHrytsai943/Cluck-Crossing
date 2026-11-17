@@ -53,13 +53,11 @@ struct RootView: View {
             })
         }
         .fullScreenCover(item: $router.launch) { launch in
-            GameView(viewModel: GameViewModel(mode: launch.mode, dependencies: dependencies), onExit: { next in
+            // A fresh identity per launch, so every run gets its own view model.
+            GameView(viewModel: GameViewModel(mode: launch.mode, dependencies: dependencies), settings: dependencies.settings, onExit: {
                 router.launch = nil
-                if let next {
-                    // "Next crossing" from the result screen.
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { startRun(next) }
-                }
             })
+            .id(launch.id)
         }
         .onAppear {
             if !store.profile.tutorialSeen { router.showTutorial = true }
@@ -80,11 +78,11 @@ struct RootView: View {
         case .timetable:
             TimetableView(store: store, router: router, startRun: startRun)
         case .vending:
-            VendingView(viewModel: VendingViewModel(store: store, haptics: dependencies.haptics, sound: dependencies.sound), router: router)
+            VendingView(viewModel: VendingViewModel(store: store, haptics: dependencies.haptics, sound: dependencies.sound), store: store, router: router)
         case .henhouse:
-            HenhouseView(viewModel: HenhouseViewModel(store: store, haptics: dependencies.haptics, sound: dependencies.sound), router: router)
+            HenhouseView(viewModel: HenhouseViewModel(store: store, haptics: dependencies.haptics, sound: dependencies.sound), store: store, router: router)
         case .roster:
-            RosterView(viewModel: RosterViewModel(store: store, provider: dependencies.leaderboard, haptics: dependencies.haptics, sound: dependencies.sound), router: router)
+            RosterView(viewModel: RosterViewModel(store: store, provider: dependencies.leaderboard, haptics: dependencies.haptics, sound: dependencies.sound), store: store, router: router)
         case .billboard:
             BillboardView(store: store, router: router)
         case .rulebook:

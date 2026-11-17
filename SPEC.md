@@ -44,4 +44,4 @@ Traffic (pickups, tractors, milk vans, combines, corn trucks) is real-time. Ever
 - SwiftUI + SpriteKit.
 - Rules live in `RunSession` (pure Swift), save data is JSON.
 - Art: `Artwork/generate_assets.swift`. Sounds: `Artwork/generate_sounds.swift`.
-- Test launch arguments: `--uitesting`, `--autopilot`, `--coins=N`, `--cleared=N`, `--sunflowers=N`, `--open=<route>`, `--seed=N`, `--show-tutorial`.
+- Test launch arguments: `--uitesting`, `--autopilot`, `--coins=N`, `--cleared=N`, `--sunflowers=N`, `--open=<route>`, `--seed=N`, `--show-intros`, `--show-tutorial`.

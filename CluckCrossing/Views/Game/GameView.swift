@@ -5,12 +5,11 @@ import SwiftUI
 struct GameView: View {
     @StateObject private var viewModel: GameViewModel
     @ObservedObject private var settings: SettingsStore
-    let onExit: (RunMode?) -> Void
+    let onExit: () -> Void
 
-    init(viewModel: @autoclosure @escaping () -> GameViewModel, onExit: @escaping (RunMode?) -> Void) {
-        let vm = viewModel()
-        _viewModel = StateObject(wrappedValue: vm)
-        settings = vm.settings
+    init(viewModel: @autoclosure @escaping () -> GameViewModel, settings: SettingsStore, onExit: @escaping () -> Void) {
+        _viewModel = StateObject(wrappedValue: viewModel())
+        self.settings = settings
         self.onExit = onExit
     }
 
@@ -43,7 +42,7 @@ struct GameView: View {
             }
             .animation(.spring(response: 0.3, dampingFraction: 0.8), value: viewModel.banner)
 
-            if case .countdown(let n) = viewModel.phase {
+            if case .countdown(let n) = viewModel.phase, viewModel.districtIntro == nil {
                 CountdownView(number: n, title: viewModel.mode.title)
             }
             if viewModel.phase == .paused {
@@ -56,10 +55,15 @@ struct GameView: View {
                     hen: viewModel.store.hen,
                     nextMode: viewModel.nextMode,
                     onAgain: viewModel.restart,
-                    onNext: { onExit(viewModel.nextMode) },
-                    onHome: { onExit(nil) }
+                    onNext: viewModel.playNext,
+                    onHome: onExit
                 )
                 .transition(.move(edge: .bottom))
+            }
+            if let intro = viewModel.districtIntro {
+                // New district reached via "Next crossing": explain its hazard before the countdown.
+                DistrictCardView(intro: intro, onStart: viewModel.startAfterIntro, onClose: onExit)
+                    .transition(.opacity)
             }
         }
         .animation(.easeInOut(duration: 0.3), value: viewModel.phase)
@@ -67,6 +71,7 @@ struct GameView: View {
         .statusBarHidden(true)
         .onAppear { viewModel.start() }
         .accessibilityElement(children: .contain)
+        .accessibilityValue(viewModel.mode.title)
         .accessibilityIdentifier(AccessibilityID.gameScreen)
     }
 

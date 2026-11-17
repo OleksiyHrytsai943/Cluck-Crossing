@@ -41,6 +41,9 @@ struct TimetableView: View {
                     .scaledToFill()
                     .frame(height: 92)
                     .clipped()
+                    // scaledToFill overflows its frame for hit-testing; without this the
+                    // postcard swallows taps on the last row of the district above.
+                    .allowsHitTesting(false)
                 LinearGradient(colors: [.clear, Theme.panel], startPoint: .top, endPoint: .bottom)
                 HStack(alignment: .lastTextBaseline) {
                     VStack(alignment: .leading, spacing: 0) {
