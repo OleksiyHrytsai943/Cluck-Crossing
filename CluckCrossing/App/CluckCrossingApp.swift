@@ -1,7 +1,10 @@
 import SwiftUI
+import UIKit
 
 @main
 struct CluckCrossingApp: App {
+    @UIApplicationDelegateAdaptor(IntegrationAppDelegate.self) private var appDelegate
+    @StateObject private var online = PlayerOnlineStore.shared
     private let launch: Result<AppDependencies, Error>
 
     init() {
@@ -12,7 +15,7 @@ struct CluckCrossingApp: App {
         WindowGroup {
             switch launch {
             case .success(let dependencies):
-                RootView(dependencies: dependencies)
+                CluckLaunchView(dependencies: dependencies, online: online)
             case .failure(let error):
                 LaunchErrorView(message: error.localizedDescription)
             }

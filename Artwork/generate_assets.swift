@@ -1100,9 +1100,6 @@ func drawIcon(size: Int) -> CGImage {
     fill(CGPath(rect: CGRect(x: 0, y: 520, width: 1024, height: 504), transform: nil), dirt)
     noiseSpeckle(CGRect(x: 0, y: 520, width: 1024, height: 504), count: 900, seed: 3, light: Col(1, 1, 1, 0.15), dark: ink.alpha(0.12), size: 3...8)
     for y in [700.0, 880.0] { stroke(poly([CGPoint(x: 0, y: y), CGPoint(x: 1024, y: y + 8)]), dirtDark.alpha(0.5), 30) }
-    // Wooden multiplier sign.
-    woodSign(CGRect(x: 250, y: 60, width: 524, height: 250), base: woodLight)
-    text("×2.4", CGPoint(x: 512, y: 185), size: 170, weight: .black, color: ink)
     ctx.saveGState()
     ctx.translateBy(x: 170, y: 330)
     ctx.scaleBy(x: 2.3, y: 2.3)

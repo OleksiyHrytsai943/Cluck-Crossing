@@ -36,34 +36,35 @@ protocol LeaderboardProviding {
     func weeklyTop(for shift: FarmWeek, player: PlayerStanding, sunflowersLit: Int, now: Date) async throws -> LeaderboardPage
 }
 
-/// Offline provider: deterministic sample rivals for the week, merged with the player's real weekly best.
-/// The page is flagged `isPreview` and says so on screen.
-struct PreviewLeaderboardProvider: LeaderboardProviding {
-    static let rivalNames = ["MeadowMabel", "HayHopper", "BarnyardBetty", "TractorTina", "SunflowerSue", "GravelGus", "OrchardOtto", "CornfieldCleo"]
-
+/// Loads real, scored player profiles from the authenticated Supabase leaderboard.
+struct SupabaseLeaderboardProvider: LeaderboardProviding {
     func weeklyTop(for shift: FarmWeek, player: PlayerStanding, sunflowersLit: Int, now: Date) async throws -> LeaderboardPage {
-        var rng = SeededGenerator(seed: DailyCrossing.seed(for: shift.weekKey))
-        var entries: [LeaderboardEntry] = Self.rivalNames.shuffled(using: &rng).prefix(6).map { name in
-            LeaderboardEntry(rank: 0, name: name, hen: Hen.all.randomElement(using: &rng)?.art ?? "hen_pepper",
-                             score: Int.random(in: 180...1_400, using: &rng), isPlayer: false)
+        let users = try await PlayerOnlineStore.shared.realLeaderboard()
+        let artByAvatar: [String: String] = [
+            "clover": "hen_pepper",
+            "pip": "hen_dot",
+            "rusty": "hen_comet",
+            "mabel": "hen_inkwell",
+            "nova": "hen_sunny",
+            "duchess": "hen_duchess",
+            "zippy": "hen_pepper"
+        ]
+        let entries = users.prefix(5).enumerated().map { index, user in
+            LeaderboardEntry(rank: index + 1, name: user.name,
+                             hen: artByAvatar[user.avatar ?? ""] ?? "hen_pepper",
+                             score: user.best_score, isPlayer: false)
         }
-        if player.weeklyBest > 0 {
-            entries.append(LeaderboardEntry(rank: 0, name: player.name, hen: player.hen, score: player.weeklyBest, isPlayer: true))
-        }
-        entries.sort { $0.score > $1.score }
-        var top = Array(entries.prefix(5))
-        for i in top.indices { top[i].rank = i + 1 }
         return LeaderboardPage(
             weekKey: shift.weekKey,
             themeTitle: shift.theme.title,
             themeDetail: shift.theme.detail,
             daysLeft: shift.daysLeft(from: now),
-            entries: top,
+            entries: Array(entries),
             rewards: RosterRewardSlot.weekly,
             sunflowersLit: sunflowersLit,
             sunflowersPerWeek: SunflowerRow.sunflowersPerWeek,
-            isPreview: true,
-            notice: "Preview roster: sample rivals. The live weekly roster and its rewards arrive in a later update."
+            isPreview: false,
+            notice: users.isEmpty ? "No scored players yet. Complete a crossing to appear here." : "Top 5 Cluck Crossing players"
         )
     }
 }

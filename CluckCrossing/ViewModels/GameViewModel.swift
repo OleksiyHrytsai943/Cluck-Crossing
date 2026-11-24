@@ -221,6 +221,7 @@ final class GameViewModel: ObservableObject {
         let result = session.makeResult()
         self.result = result
         reward = store.record(result)
+        Task { await PlayerOnlineStore.shared.submitResult(result) }
         snapshot = session.snapshot
         phase = .finished
         sound.stopMusic()

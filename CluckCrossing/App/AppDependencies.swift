@@ -13,7 +13,7 @@ final class AppDependencies {
     let seed: UInt64?
     /// Section to open at launch (`--open=roster`), UI tests and screenshot tours only.
     let openRoute: String?
-    let leaderboard: LeaderboardProviding = PreviewLeaderboardProvider()
+    let leaderboard: LeaderboardProviding = SupabaseLeaderboardProvider()
 
     init(arguments: [String] = ProcessInfo.processInfo.arguments) throws {
         isUITesting = arguments.contains("--uitesting")

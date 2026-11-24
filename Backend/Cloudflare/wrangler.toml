@@ -1,0 +1,35 @@
+# Cloudflare Worker for cluckcrossing.site
+# One worker serves BOTH the static marketing site (ASSETS) and the launch-check
+# API (/check, /health) implemented in worker.mjs. Deploying the site and the API
+# together from here prevents a "site-only" deploy from wiping the API again
+# (which is what happened on 2026-11-18 when the worker was overwritten by a
+# minimal `env.ASSETS.fetch` stub).
+#
+# Deploy (needs Node + wrangler on the machine running it):
+#   1) cd Site && ./configure.sh cluckcrossing.site OleksiyHrytsai943@icloud.com && cd ..
+#   2) cd Backend/Cloudflare && wrangler deploy
+#   3) wrangler secret put CHECK_API_KEY     # MUST equal the Supabase function secret CHECK_API_KEY
+#      wrangler secret put BANDA_CLICK_TOKEN  # Banda click-API token (X-Click-Token)
+#
+# Verify after deploy:
+#   curl https://cluckcrossing.site/health        -> {"status":"ok"}
+#   curl -X POST https://cluckcrossing.site/check  -> 401 {"error":"unauthorized"} (alive, needs key)
+
+name = "cluckcrossing-site"
+main = "worker.mjs"
+compatibility_date = "2026-11-18"
+workers_dev = false
+
+# Static site. run_worker_first = true so the Worker sees every request: it answers
+# /check and /health and rewrites the support email in HTML, then falls through to
+# env.ASSETS.fetch for all other paths. ../../Site must be configured (step 1 above)
+# so {{DOMAIN}} / {{SUPPORT_EMAIL}} placeholders are filled before upload.
+[assets]
+directory = "../../Site"
+binding = "ASSETS"
+run_worker_first = true
+
+# Keep the production custom domain bound to this worker.
+[[routes]]
+pattern = "cluckcrossing.site"
+custom_domain = true
