@@ -4,7 +4,7 @@ workflows:
     max_build_duration: 90
     instance_type: mac_mini_m2
     environment:
-      xcode: 27.2
+      xcode: 26.5
       vars:
         BUNDLE_ID: "com.cluckcrossing.game30"
         XCODE_SCHEME: "CluckCrossing"
