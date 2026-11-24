@@ -1,0 +1,39 @@
+workflows:
+  ios-release:
+    name: Cluck Crossing iOS release
+    max_build_duration: 90
+    instance_type: mac_mini_m2
+    environment:
+      xcode: 27.2
+      vars:
+        BUNDLE_ID: "com.cluckcrossing.game30"
+        XCODE_SCHEME: "CluckCrossing"
+      groups:
+        - appstore_credentials   # APP_STORE_CONNECT_ISSUER_ID, APP_STORE_CONNECT_KEY_IDENTIFIER, APP_STORE_CONNECT_PRIVATE_KEY
+    scripts:
+      - name: Set up keychain
+        script: keychain initialize
+      - name: Fetch distribution signing files (regenerates profile with Push entitlement)
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+      - name: Add certificates to keychain
+        script: keychain add-certificates
+      - name: Apply provisioning profiles to the project
+        script: xcode-project use-profiles
+      - name: Build signed IPA
+        script: |
+          xcode-project build-ipa \
+            --project "CluckCrossing.xcodeproj" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: false
+        submit_to_app_store: false
