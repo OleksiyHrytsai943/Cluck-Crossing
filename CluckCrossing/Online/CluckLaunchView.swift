@@ -53,7 +53,7 @@ struct TopPlayersView: View {
                 .navigationTitle("Top Players")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    if let onClose { ToolbarItem(placement: .topBarLeading) { Button("Back", action: onClose) } }
+                    ToolbarItem(placement: .topBarLeading) { if let onClose { Button("Back", action: onClose) } }
                     ToolbarItem(placement: .topBarTrailing) { Button("Refresh") { Task { await online.refreshLeaderboard() } }
                 } }
                 .task { await online.refreshLeaderboard() }
